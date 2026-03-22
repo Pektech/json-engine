@@ -56,7 +56,7 @@
 - [ ] **UIUX-01**: Dark theme by default (light theme optional)
 - [ ] **UIUX-02**: TopAppBar with project name and navigation
 - [ ] **UIUX-03**: SideNavBar with file explorer and tools
-- [ ] **UIUX-04**: Keyboard shortcuts for common actions (Ctrl+O, Ctrl+S, etc.)
+- [x] **UIUX-04**: Keyboard shortcuts for common actions (Ctrl+O, Ctrl+S, etc.)
 - [ ] **UIUX-05**: Canvas renders within 2 seconds for 10KB JSON files
 - [ ] **UIUX-06**: Canvas zoom/pan maintains 60fps
 
@@ -138,7 +138,7 @@
 | UIUX-01 | Phase 1 | Pending |
 | UIUX-02 | Phase 1 | Pending |
 | UIUX-03 | Phase 1 | Pending |
-| UIUX-04 | Phase 4 | Pending |
+| UIUX-04 | Phase 4 | Complete |
 | UIUX-05 | Phase 2 | Pending |
 | UIUX-06 | Phase 2 | Pending |
 
