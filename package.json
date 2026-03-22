@@ -3,14 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3030",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
     "test:watch": "jest --watch",
     "security:audit": "npm audit --audit-level=moderate",
-    "security:check": "npm run security:audit"
+    "security:check": "npm run security:audit",
+    "analyze": "cross-env ANALYZE=true next build",
+    "build:analyze": "npm run analyze"
   },
   "dependencies": {
     "@dagrejs/dagre": "^2.0.4",
