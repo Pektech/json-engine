@@ -145,3 +145,5 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     )
   }
 )
+
+export default CodeEditor;
