@@ -22,6 +22,7 @@ interface AppState {
   currentFile: string | null
   nodePositions: Record<string, { x: number; y: number }>
   userOverrideSave: boolean
+  gatewayToken: string | null
 }
 
 interface AppActions {
@@ -39,6 +40,8 @@ interface AppActions {
   setUserOverrideSave: (override: boolean) => void
   loadFile: (filePath: string, content: string) => Promise<void>
   savePositions: () => void
+  setGatewayToken: (token: string | null) => void
+  clearGatewayToken: () => void
 }
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
@@ -58,7 +61,8 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   filteredNodeIds: new Set(),
   currentFile: null,
   nodePositions: {},
-  userOverrideSave: false,
+    userOverrideSave: false,
+    gatewayToken: null,
 
   setJsonText: (text: string) => {
     set({ jsonText: text, isDirty: true, validationErrors: [] })
@@ -234,4 +238,12 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
     
     saveNodePositions(currentFile, state)
   },
+
+  // SECURITY DECISION: Token is stored memory-only in Zustand store.
+  // It is intentionally NOT persisted to localStorage or sessionStorage
+  // to prevent XSS attacks from accessing stored tokens.
+  // Token is cleared on page reload (memory reset).
+  // See: .planning/PROJECT.md § Constraints
+  setGatewayToken: (token: string | null) => set({ gatewayToken: token }),
+  clearGatewayToken: () => set({ gatewayToken: null }),
 }))
