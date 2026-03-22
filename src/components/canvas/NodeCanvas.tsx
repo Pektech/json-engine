@@ -10,14 +10,13 @@ import {
   useEdgesState,
   type Node,
   type Edge,
-  type ReactFlowInstance,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { JsonNode } from './JsonNode'
 import { JsonEdge } from './JsonEdge'
 import { jsonToGraph } from '@/lib/json-to-graph'
 import { layoutGraph } from '@/lib/graph-layout'
-import type { CanvasNode, CanvasEdge } from '@/types/canvas'
+import { useFocusContext } from '@/hooks/useFocusContext'
 
 const nodeTypes = {
   jsonNode: JsonNode,
@@ -29,12 +28,12 @@ const edgeTypes = {
 
 interface NodeCanvasProps {
   json: any
-  onNodeSelect?: (id: string) => void
+  onNodeSelect?: (id: string) => void  
   selectedNodeId?: string | null
 }
 
 export function NodeCanvas({ json, onNodeSelect, selectedNodeId }: NodeCanvasProps) {
-  const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null)
+  const { setFocusedArea } = useFocusContext()
   
   const graphData = useMemo(() => {
     return jsonToGraph(json)
@@ -44,11 +43,11 @@ export function NodeCanvas({ json, onNodeSelect, selectedNodeId }: NodeCanvasPro
     return layoutGraph(graphData.nodes, graphData.edges)
   }, [graphData])
   
-  const [nodes, setNodes, onNodesChange] = useNodesState([])
-  const [edges, setEdges, onEdgesChange] = useEdgesState([])
+  const [existingNodes, setNodes] = useState<Node[]>([])
+  const [existingEdges, setEdges] = useState<Edge[]>([])
   
   useEffect(() => {
-    const flowNodes: Node[] = layoutedNodes.map((node) => ({
+    const flowNodes: any[] = layoutedNodes.map((node) => ({
       id: node.id,
       type: node.type,
       position: node.position,
@@ -58,7 +57,7 @@ export function NodeCanvas({ json, onNodeSelect, selectedNodeId }: NodeCanvasPro
       selected: node.id === selectedNodeId,
     }))
     
-    const flowEdges: Edge[] = graphData.edges.map((edge) => ({
+    const flowEdges: any[] = graphData.edges.map((edge) => ({
       id: edge.id,
       source: edge.source,
       target: edge.target,
@@ -67,10 +66,10 @@ export function NodeCanvas({ json, onNodeSelect, selectedNodeId }: NodeCanvasPro
     
     setNodes(flowNodes)
     setEdges(flowEdges)
-  }, [layoutedNodes, graphData.edges, selectedNodeId, setNodes, setEdges])
+  }, [layoutedNodes, graphData.edges, selectedNodeId])
   
   const onNodeClick = useCallback(
-    (_: React.MouseEvent, node: Node) => {
+    (_: React.MouseEvent, node: any) => {
       if (onNodeSelect) {
         onNodeSelect(node.id)
       }
@@ -78,20 +77,18 @@ export function NodeCanvas({ json, onNodeSelect, selectedNodeId }: NodeCanvasPro
     [onNodeSelect]
   )
   
-  const onInit = useCallback((instance: ReactFlowInstance) => {
-    setReactFlowInstance(instance)
-    instance.fitView({ padding: 0.2 })
-  }, [])
+  // Handle canvas focus when user interacts with the pane
+  const onPaneClick = useCallback(() => {
+    setFocusedArea('canvas');
+  }, [setFocusedArea])
   
   return (
     <div className="w-full h-full">
       <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
+        nodes={existingNodes}
+        edges={existingEdges}
         onNodeClick={onNodeClick}
-        onInit={onInit}
+        onPaneClick={onPaneClick}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView

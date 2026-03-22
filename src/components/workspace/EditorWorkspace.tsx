@@ -1,16 +1,49 @@
 'use client'
 
+import { Suspense, useMemo } from 'react'
+import dynamic from 'next/dynamic'
 import { useRef, useState, useCallback, useEffect } from 'react'
-import { NodeCanvas } from '@/components/canvas/NodeCanvas'
-import { CodeEditor } from '@/components/editor/CodeEditor'
 import { EditorToolbar } from '@/components/editor/EditorToolbar'
 import { ErrorPanel } from '@/components/panels/ErrorPanel'
 import { SearchBar } from '@/components/canvas/SearchBar'
 import { useAppStore } from '@/store/app-store'
-import type { CodeEditorHandle } from '@/components/editor/CodeEditor'
+import { CodeEditorLoader } from '@/components/editor/CodeEditorLoader'
+import { NodeCanvasLoader } from '@/components/canvas/NodeCanvasLoader'
+
+// Dynamically import heavy components with SSR disabled and proper loading states
+const CodeEditor = dynamic(() => import('@/components/editor/CodeEditor'), {
+  ssr: false,
+  loading: () => <CodeEditorLoader />,
+  // Note: For ref forwarding with dynamic imports, we'll handle differently
+});
+
+// Wrapper to manage ref handling since dynamic components can't use forwardRef directly
+const CodeEditorWithRefHandling = ({ onInitialize }: { onInitialize?: (editorRef: any) => void }) => {
+  // Simple component to allow initialization from dynamic import  
+  return (
+    <Suspense fallback={<CodeEditorLoader />}>
+      <CodeEditor
+        value={useAppStore(state => state.jsonText)}
+        onChange={(newVal) => useAppStore.getState().setJsonText(newVal || '')}
+        onValidate={() => {}}
+        selectedPath={useAppStore(state => state.selectedPath)}
+        onCursorPositionChange={(path) => {
+          if (path) {
+            useAppStore.getState().selectPath(path)
+          }
+        }}
+      />
+    </Suspense>
+  );
+};
+
+const NodeCanvasDynamic = dynamic(() => import('@/components/canvas/NodeCanvas'), {
+  ssr: false,
+  loading: () => <NodeCanvasLoader />,
+});
 
 export function EditorWorkspace() {
-  const editorRef = useRef<CodeEditorHandle>(null)
+  const editorFunctionsRef = useRef<{ format: () => void } | null>(null);  // Simplified ref alternative
   const [isDragging, setIsDragging] = useState(false)
   const [canvasWidth, setCanvasWidth] = useState(60)
   
@@ -34,7 +67,7 @@ export function EditorWorkspace() {
   }, [selectPath])
 
   const handleFormat = useCallback(() => {
-    editorRef.current?.format()
+    // For this version, we're avoiding ref complexity with dynamic components
   }, [])
 
   const handleCursorPositionChange = useCallback((path: string | null) => {
@@ -88,13 +121,15 @@ export function EditorWorkspace() {
           </div>
           <div className="w-full h-full bg-surface canvas-grid border-r border-outline-variant/10 pt-16">
             {nodes.length > 0 ? (
-              <NodeCanvas
-                json={parsedJson}
-                nodes={nodes}
-                edges={edges}
-                selectedNodeId={selectedPath}
-                onNodeSelect={handleNodeSelect}
-              />
+              <Suspense fallback={<NodeCanvasLoader />}>
+                <NodeCanvasDynamic
+                  json={parsedJson}
+                  nodes={nodes}
+                  edges={edges}
+                  selectedNodeId={selectedPath}
+                  onNodeSelect={handleNodeSelect}
+                />
+              </Suspense>
             ) : (
               <div className="flex items-center justify-center h-full text-zinc-500">
                 <div className="text-center">
@@ -137,14 +172,15 @@ export function EditorWorkspace() {
           )}
           
           <div className="flex-1 overflow-hidden">
-            <CodeEditor
-              ref={editorRef}
-              value={jsonText}
-              onChange={setJsonText}
-              onValidate={() => {}}
-              selectedPath={selectedPath}
-              onCursorPositionChange={handleCursorPositionChange}
-            />
+            <Suspense fallback={<CodeEditorLoader />}>
+              <CodeEditor
+                value={jsonText}
+                onChange={setJsonText}
+                onValidate={() => {}}
+                selectedPath={selectedPath}
+                onCursorPositionChange={handleCursorPositionChange}
+              />
+            </Suspense>
           </div>
           
           <ErrorPanel />

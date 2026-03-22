@@ -5,6 +5,7 @@ import Editor, { useMonaco } from '@monaco-editor/react'
 import type { editor } from 'monaco-editor'
 import { pathToLine, lineToPath } from '@/lib/path-to-line'
 import { useAppStore } from '@/store/app-store'
+import { useFocusContext } from '@/hooks/useFocusContext'
 
 interface CodeEditorProps {
   value: string
@@ -26,19 +27,42 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     ref
   ) {
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
-    const monaco = useMonaco()
-    const validationErrors = useAppStore(state => state.validationErrors)
-    
-    useImperativeHandle(ref, () => ({
-      format: () => {
-        if (editorRef.current) {
-          editorRef.current.getAction('editor.action.formatDocument')?.run()
-        }
-      },
-      getPathAtLine: (line: number) => {
-        return lineToPath(value, line)
-      },
-    }))
+  const monaco = useMonaco()
+  const validationErrors = useAppStore(state => state.validationErrors)
+  const { setFocusedArea } = useFocusContext()
+  
+  useImperativeHandle(ref, () => ({
+    format: () => {
+      if (editorRef.current) {
+        editorRef.current.getAction('editor.action.formatDocument')?.run()
+      }
+    },
+    getPathAtLine: (line: number) => {
+      return lineToPath(value, line)
+    },
+  }))
+  
+  useEffect(() => {
+    if (editorRef.current) {
+      const editor = editorRef.current;
+      
+      // Set focus area when editor receives focus
+      const onFocusRegistration = editor.onDidFocusEditorText(() => {
+        setFocusedArea('editor');
+      });
+      
+      // Set focus area when editor loses focus
+      const onBlurRegistration = editor.onDidBlurEditorText(() => {
+        setFocusedArea('global');
+      });
+      
+      // Cleanup event handlers
+      return () => {
+        onFocusRegistration?.dispose?.();
+        onBlurRegistration?.dispose?.();
+      };
+    }
+  }, [editorRef, setFocusedArea]);
     
     useEffect(() => {
       if (monaco && editorRef.current) {

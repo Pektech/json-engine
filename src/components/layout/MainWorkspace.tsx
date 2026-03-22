@@ -1,6 +1,10 @@
 'use client'
 
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
+
 export function MainWorkspace() {
+  useKeyboardShortcuts(); // Activate all registered keyboard shortcuts
+
   return (
     <main className="flex-1 ml-64 flex flex-col relative">
       <div className="flex h-full">
