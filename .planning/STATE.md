@@ -1,8 +1,8 @@
 # State: JSON.engine
 
-**Current Phase:** Phase 2 (Core Features)  
+**Current Phase:** Phase 3 (Validation & Search)  
 **Status:** ✅ Complete  
-**Last Action:** All 4 Phase 2 plans executed and committed
+**Last Action:** All 4 Phase 3 plans executed and committed
 
 ---
 
@@ -12,59 +12,60 @@ See: `.planning/PROJECT.md` (updated 2026-03-22)
 
 **Core value:** OpenClaw administrators can safely edit complex JSON configurations with immediate visual feedback and validation, reducing errors before they reach production.
 
-**Current focus:** Phase 3 - Validation & Search (planned)
+**Current focus:** Phase 4 - Polish & Release (planned)
 
 ---
 
 ## Phase Progress
 
 ### Phase 1: Foundation ✅ COMPLETE
-**Goal:** Working Next.js app with Tailwind styling, basic layout, and file open/save
+- ✅ Next.js project setup
+- ✅ Layout components
+- ✅ File manager
 
-**Plans Completed:**
-- ✅ 01-01: Initialize Next.js project
-- ✅ 01-02: Create layout components  
-- ✅ 01-03: Implement file manager
+### Phase 2: Core Features ✅ COMPLETE  
+- ✅ React Flow foundation
+- ✅ JsonNode components
+- ✅ Monaco Editor
+- ✅ Bidirectional sync
 
-### Phase 2: Core Features ✅ COMPLETE
-**Goal:** Visual node canvas and code editor with bidirectional sync
-
+### Phase 3: Validation & Search ✅ COMPLETE
 **Status:** ✅ Planned | ✅ In Progress | ✅ Complete
 
 **Plans Completed:**
-- ✅ 02-01: React Flow foundation
-  - Canvas types, JSON transformation, layout engine
-  - NodeCanvas component with Controls, MiniMap, Background
-- ✅ 02-02: JsonNode components
-  - NodeTypeBadge with 6 JSON type colors
-  - JsonNode with selection styling and expand/collapse
-  - JsonEdge with smooth step paths
-- ✅ 02-03: Monaco Editor integration
-  - CodeEditor with JSON syntax highlighting
-  - pathToLine / lineToPath mapping utilities
-  - EditorToolbar with breadcrumbs and error counts
-- ✅ 02-04: Bidirectional sync
-  - Zustand store with unified state
-  - EditorWorkspace with resizable panels
-  - Debounced updates (100ms)
-  - Canvas ↔ Editor sync working
+- ✅ 03-01: AJV integration
+  - ValidationError type
+  - ValidationService with AJV
+  - Auto-validation on JSON change
+- ✅ 03-02: Error display
+  - Error badges on JsonNode
+  - Monaco editor squiggles
+  - ErrorPanel component
+- ✅ 03-03: Canvas search
+  - SearchBar component
+  - Real-time filtering
+  - Match count display
+- ✅ 03-04: Node persistence
+  - JsonEngineState type
+  - Persistence service
+  - Auto-save on move
+  - Save blocking with override
 
 **Commits:**
-- 43b15db feat(02-01): React Flow foundation
-- a940295 feat(02-02): JsonNode components
-- d50ff55 feat(02-03): Monaco Editor integration
-- e3558ff feat(02-04): Bidirectional sync
+- dc95642 feat(03-01): AJV integration
+- 78ea8c1 feat(03-02): Error display
+- 4376fd4 feat(03-03): Canvas search
+- 892049c feat(03-04): Node persistence
 
 ---
 
 ## Session Context
 
 ### Active Files
-- src/components/canvas/ - NodeCanvas, JsonNode, JsonEdge
-- src/components/editor/ - CodeEditor, EditorToolbar
-- src/components/workspace/ - EditorWorkspace
-- src/store/ - Zustand app store
-- src/lib/ - json-to-graph, path-to-line
+- src/lib/validation.ts - AJV validation
+- src/components/canvas/SearchBar.tsx - Canvas search
+- src/components/panels/ErrorPanel.tsx - Error list
+- src/services/node-persistence.ts - Position persistence
 
 ### Decisions Pending
 None
@@ -76,13 +77,14 @@ None
 
 ## Next Actions
 
-**Plan Phase 3:** Run `/gsd-plan-phase 3` to create plans for Validation & Search
+**Plan Phase 4:** Run `/gsd-plan-phase 4` to create plans for Polish & Release
 
-Phase 3 Scope:
-- AJV schema validation
-- Error highlighting (canvas badges, editor squiggles)
-- Canvas search/filter
-- Node position persistence
+Phase 4 Scope:
+- Performance optimization (bundle splitting, lazy loading)
+- Keyboard shortcuts
+- Security audit
+- E2E testing
+- Beta release
 
 ---
-*Last updated: 2026-03-22 after Phase 2 completion*
+*Last updated: 2026-03-22 after Phase 3 completion*
