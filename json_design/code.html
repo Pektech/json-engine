@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-error-container": "#ffdad6",
+              "on-tertiary": "#4f2500",
+              "outline": "#8a919d",
+              "on-background": "#e5e2e1",
+              "error": "#ffb4ab",
+              "tertiary": "#ffb784",
+              "on-primary-fixed": "#001d36",
+              "surface-container-low": "#1c1b1b",
+              "secondary-fixed-dim": "#adc9ee",
+              "tertiary-fixed-dim": "#ffb784",
+              "on-tertiary-fixed-variant": "#713700",
+              "surface-container-high": "#2a2a2a",
+              "primary": "#9fcaff",
+              "on-surface-variant": "#c0c7d3",
+              "on-secondary-fixed": "#001d36",
+              "surface-container": "#201f1f",
+              "on-primary": "#003258",
+              "on-primary-container": "#ffffff",
+              "surface-variant": "#353534",
+              "primary-fixed-dim": "#9fcaff",
+              "on-tertiary-container": "#ffffff",
+              "secondary-container": "#2c4968",
+              "surface": "#131313",
+              "outline-variant": "#404751",
+              "on-primary-fixed-variant": "#00497d",
+              "inverse-surface": "#e5e2e1",
+              "surface-bright": "#393939",
+              "on-secondary": "#133250",
+              "inverse-on-surface": "#313030",
+              "secondary": "#adc9ee",
+              "surface-container-highest": "#353534",
+              "tertiary-fixed": "#ffdcc6",
+              "secondary-fixed": "#d1e4ff",
+              "on-secondary-fixed-variant": "#2c4968",
+              "background": "#131313",
+              "surface-container-lowest": "#0e0e0e",
+              "on-tertiary-fixed": "#301400",
+              "on-surface": "#e5e2e1",
+              "inverse-primary": "#0061a4",
+              "on-secondary-container": "#9bb7dc",
+              "primary-fixed": "#d1e4ff",
+              "surface-dim": "#131313",
+              "on-error": "#690005",
+              "primary-container": "#007acc",
+              "surface-tint": "#9fcaff",
+              "tertiary-container": "#b95e01",
+              "error-container": "#93000a"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Space Grotesk"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            font-size: 18px;
+        }
+        .node-connector {
+            stroke: #404751;
+            stroke-width: 1.5;
+            fill: none;
+        }
+        .canvas-grid {
+            background-image: radial-gradient(circle, #2a2a2a 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-6 w-full z-50 bg-[#131313] border-none docked full-width top-0 h-12">
+<div class="flex items-center gap-8">
+<span class="font-['Space_Grotesk'] font-bold text-white tracking-tighter text-xl">JSON.engine</span>
+<nav class="flex gap-6 items-center h-full">
+<a class="font-['Inter'] text-sm tracking-tight text-white border-b-2 border-sky-500 pb-1" href="#">Projects</a>
+<a class="font-['Inter'] text-sm tracking-tight text-zinc-500 hover:text-zinc-300 transition-colors" href="#">Deploy</a>
+<a class="font-['Inter'] text-sm tracking-tight text-zinc-500 hover:text-zinc-300 transition-colors" href="#">History</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center bg-surface-container-low px-3 py-1 rounded border border-outline-variant/20 gap-2">
+<span class="material-symbols-outlined text-zinc-500">search</span>
+<input class="bg-transparent border-none outline-none text-xs w-48 font-label uppercase tracking-widest focus:ring-0 placeholder-zinc-600" placeholder="Search nodes..." type="text"/>
+</div>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-zinc-800/50 transition-all scale-95 active:scale-90 duration-100 text-zinc-400">
+<span class="material-symbols-outlined">cloud_done</span>
+</button>
+<button class="p-2 hover:bg-zinc-800/50 transition-all scale-95 active:scale-90 duration-100 text-zinc-400">
+<span class="material-symbols-outlined">share</span>
+</button>
+<button class="p-2 hover:bg-zinc-800/50 transition-all scale-95 active:scale-90 duration-100 text-zinc-400">
+<span class="material-symbols-outlined">terminal</span>
+</button>
+</div>
+<img alt="User profile" class="w-7 h-7 rounded-full border border-outline-variant/30" data-alt="Close up professional headshot avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbdwGxPFmLwZUTdmFDlgnc_5o73tCJMRZHQ_oU5l4VOet3lN2SKM6UIOJQhGMpy4PJlPSNsld8PONMWjTeiCKhUbgaUid9V4MWTyvJkSdvl_qCau7Q7uhjm0L1taYcLuozVUz9FJUDj4xvfbl-5rzjNizBgL2f2953YEEx1DajHa-VdtkL1GvLb41JMllHI0e-yDXFYiscPArHYcB2B7DMSwMyJYuvZIoTBrNtQLRskickFXsjGcK3jvqDABkohZnjB1N5x_EZEif2"/>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar -->
+<aside class="flex flex-col h-screen fixed left-0 top-0 pt-12 z-40 bg-[#0e0e0e] shadow-[1px_0_0_0_rgba(255,255,255,0.05)] w-64">
+<div class="px-6 py-8">
+<div class="flex items-center gap-3 mb-1">
+<div class="w-6 h-6 bg-primary-container rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-xs text-white" style="font-variation-settings: 'FILL' 1;">dataset</span>
+</div>
+<span class="font-['Space_Grotesk'] font-bold text-xs tracking-tight text-white">JSON_EDITOR_V1</span>
+</div>
+<span class="font-['Space_Grotesk'] uppercase text-[10px] tracking-widest text-zinc-500">main/root.json</span>
+</div>
+<nav class="flex-1 space-y-1 px-2">
+<div class="bg-[#2a2a2a] text-sky-400 border-l-2 border-sky-500 px-4 py-3 flex items-center gap-3 cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined">folder_open</span>
+<span class="font-['Space_Grotesk'] uppercase text-[10px] tracking-widest">Explorer</span>
+</div>
+<div class="text-zinc-500 px-4 py-3 flex items-center gap-3 hover:bg-zinc-800/30 cursor-pointer active:opacity-80 transition-colors">
+<span class="material-symbols-outlined">schema</span>
+<span class="font-['Space_Grotesk'] uppercase text-[10px] tracking-widest">Graph_Nodes</span>
+</div>
+<div class="text-zinc-500 px-4 py-3 flex items-center gap-3 hover:bg-zinc-800/30 cursor-pointer active:opacity-80 transition-colors">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-['Space_Grotesk'] uppercase text-[10px] tracking-widest">Debugger</span>
+</div>
+<div class="text-zinc-500 px-4 py-3 flex items-center gap-3 hover:bg-zinc-800/30 cursor-pointer active:opacity-80 transition-colors">
+<span class="material-symbols-outlined">settings_input_component</span>
+<span class="font-['Space_Grotesk'] uppercase text-[10px] tracking-widest">Settings</span>
+</div>
+</nav>
+<div class="p-4">
+<button class="w-full bg-gradient-to-br from-primary-container to-primary py-2 rounded text-on-primary-container font-label uppercase text-[10px] tracking-[0.2em] font-bold shadow-lg shadow-primary-container/20">
+                    New Node
+                </button>
+</div>
+<div class="p-4 border-t border-outline-variant/10 space-y-2">
+<div class="flex items-center gap-3 text-zinc-500 px-2 py-1 hover:text-zinc-200 transition-colors cursor-pointer">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-['Space_Grotesk'] uppercase text-[10px] tracking-widest">Documentation</span>
+</div>
+<div class="flex items-center gap-3 text-zinc-500 px-2 py-1 hover:text-zinc-200 transition-colors cursor-pointer">
+<span class="material-symbols-outlined">contact_support</span>
+<span class="font-['Space_Grotesk'] uppercase text-[10px] tracking-widest">Support</span>
+</div>
+</div>
+</aside>
+<!-- Main Workspace -->
+<main class="flex-1 ml-64 flex flex-col relative">
+<div class="flex h-full">
+<!-- Left: Node Canvas -->
+<div class="w-3/5 bg-surface relative overflow-hidden canvas-grid border-r border-outline-variant/10">
+<!-- SVG Overlay for lines -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none">
+<path class="node-connector" d="M 120 150 C 220 150, 180 320, 320 320"></path>
+<path class="node-connector" d="M 480 320 C 580 320, 540 180, 680 180"></path>
+<path class="node-connector" d="M 480 320 C 580 320, 540 460, 680 460"></path>
+</svg>
+<!-- Root Node -->
+<div class="absolute top-24 left-12 w-48 bg-surface-container-high rounded-lg p-3 border border-outline-variant/30 shadow-2xl">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label uppercase text-[9px] tracking-widest text-primary font-bold">Object</span>
+<span class="material-symbols-outlined text-xs text-zinc-500">more_vert</span>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between items-center text-[11px]">
+<span class="text-on-surface-variant font-mono">id</span>
+<span class="text-tertiary">"root_01"</span>
+</div>
+<div class="flex justify-between items-center text-[11px]">
+<span class="text-on-surface-variant font-mono">version</span>
+<span class="text-tertiary">1.0.4</span>
+</div>
+</div>
+</div>
+<!-- Selected Node -->
+<div class="absolute top-[280px] left-[320px] w-56 bg-surface-container-highest rounded-lg p-3 border-2 border-primary shadow-2xl ring-4 ring-primary/10">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label uppercase text-[9px] tracking-widest text-primary font-bold">Schema_Node</span>
+<div class="flex gap-1">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</div>
+</div>
+<div class="space-y-2 py-1">
+<div class="flex justify-between items-center text-[11px] group cursor-pointer hover:bg-white/5 p-1 rounded transition-colors">
+<span class="text-on-surface font-mono">meta_data</span>
+<span class="material-symbols-outlined text-[10px] text-zinc-500">chevron_right</span>
+</div>
+<div class="flex justify-between items-center text-[11px] group cursor-pointer bg-primary/10 p-1 rounded border border-primary/20">
+<span class="text-primary font-mono font-bold">entities</span>
+<span class="material-symbols-outlined text-[10px] text-primary">circle</span>
+</div>
+</div>
+</div>
+<!-- Leaf Nodes -->
+<div class="absolute top-36 left-[680px] w-40 bg-surface-container-low/80 backdrop-blur-md rounded p-3 border border-outline-variant/10">
+<span class="font-label uppercase text-[9px] tracking-widest text-zinc-500 block mb-2">Array [2]</span>
+<div class="h-1 w-full bg-zinc-800 rounded overflow-hidden mb-1">
+<div class="w-1/2 h-full bg-primary"></div>
+</div>
+<span class="text-[10px] text-zinc-600 font-mono italic">user_profiles...</span>
+</div>
+<div class="absolute top-[420px] left-[680px] w-40 bg-surface-container-low/80 backdrop-blur-md rounded p-3 border border-outline-variant/10">
+<span class="font-label uppercase text-[9px] tracking-widest text-zinc-500 block mb-2">Config_Map</span>
+<div class="space-y-1">
+<div class="flex gap-2 items-center">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+<span class="text-[10px] text-on-surface-variant font-mono">debug: true</span>
+</div>
+</div>
+</div>
+<!-- Canvas Controls -->
+<div class="absolute bottom-6 left-6 flex gap-2">
+<button class="w-10 h-10 bg-surface-container-high rounded-lg flex items-center justify-center border border-outline-variant/20 hover:border-primary/50 transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+<button class="w-10 h-10 bg-surface-container-high rounded-lg flex items-center justify-center border border-outline-variant/20 hover:border-primary/50 transition-colors">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<button class="px-4 h-10 bg-surface-container-high rounded-lg flex items-center gap-2 border border-outline-variant/20 hover:border-primary/50 transition-colors font-label uppercase text-[10px] tracking-widest">
+<span class="material-symbols-outlined">fit_screen</span>
+                            Center
+                        </button>
+</div>
+</div>
+<!-- Right: Code Editor -->
+<div class="w-2/5 bg-[#0e0e0e] flex flex-col">
+<!-- Editor Tabs -->
+<div class="flex bg-surface-container-lowest border-b border-outline-variant/5">
+<div class="px-4 py-2 bg-surface flex items-center gap-2 border-t-2 border-primary">
+<span class="material-symbols-outlined text-xs text-amber-500">javascript</span>
+<span class="font-label text-[11px] tracking-wider text-on-surface">root.json</span>
+<span class="material-symbols-outlined text-[10px] text-zinc-600 hover:text-white cursor-pointer">close</span>
+</div>
+<div class="px-4 py-2 hover:bg-surface-container-low flex items-center gap-2 transition-colors cursor-pointer border-t-2 border-transparent">
+<span class="material-symbols-outlined text-xs text-sky-500">data_object</span>
+<span class="font-label text-[11px] tracking-wider text-zinc-500">schema.json</span>
+</div>
+</div>
+<!-- Editor Content -->
+<div class="flex-1 flex font-mono text-sm leading-relaxed p-4 overflow-y-auto">
+<!-- Line Numbers -->
+<div class="w-10 text-zinc-700 text-right pr-4 select-none">
+                            1<br/>2<br/>3<br/>4<br/>5<br/>6<br/>7<br/>8<br/>9<br/>10<br/>11<br/>12<br/>13<br/>14<br/>15<br/>16<br/>17<br/>18<br/>19<br/>20
+                        </div>
+<!-- Code Area -->
+<div class="flex-1">
+<span class="text-sky-300">{</span><br/>
+                              <span class="text-on-surface-variant">"id"</span>: <span class="text-tertiary">"root_01"</span>,<br/>
+                              <span class="text-on-surface-variant">"version"</span>: <span class="text-tertiary">"1.0.4"</span>,<br/>
+                              <span class="text-on-surface-variant">"metadata"</span>: <span class="text-sky-300">{</span><br/>
+                                <span class="text-on-surface-variant">"created_at"</span>: <span class="text-tertiary">"2023-11-20"</span>,<br/>
+                                <span class="text-on-surface-variant">"owner"</span>: <span class="text-tertiary">"dev_team_alpha"</span><br/>
+                              <span class="text-sky-300">}</span>,<br/>
+                              <span class="text-primary font-bold">"entities"</span>: <span class="text-sky-300">[</span><br/>
+                                <span class="text-sky-300">{</span><br/>
+                                  <span class="text-on-surface-variant">"name"</span>: <span class="text-tertiary">"Node_Alpha"</span>,<br/>
+                                  <span class="text-on-surface-variant">"type"</span>: <span class="text-tertiary">"Compute"</span>,<br/>
+                                  <span class="text-on-surface-variant">"active"</span>: <span class="text-sky-400">true</span><br/>
+                                <span class="text-sky-300">}</span>,<br/>
+                                <span class="text-sky-300">{</span><br/>
+                                  <span class="text-on-surface-variant">"name"</span>: <span class="text-tertiary">"Node_Beta"</span>,<br/>
+                                  <span class="text-on-surface-variant">"status"</span>: <span class="text-tertiary">"Standby"</span><br/>
+                                <span class="text-sky-300">}</span><br/>
+                              <span class="text-sky-300">]</span>,<br/>
+                              <span class="text-on-surface-variant">"config"</span>: <span class="text-sky-300">{</span><br/>
+                                <span class="text-on-surface-variant">"debug"</span>: <span class="text-sky-400">true</span><br/>
+                              <span class="text-sky-300">}</span><br/>
+<span class="text-sky-300">}</span>
+<div class="h-1 w-2 bg-primary/40 animate-pulse inline-block align-middle ml-1"></div>
+</div>
+</div>
+<!-- Editor Footer -->
+<div class="h-8 bg-surface-container-low border-t border-outline-variant/10 flex items-center justify-between px-4">
+<div class="flex gap-4">
+<span class="font-label text-[9px] text-zinc-500 uppercase tracking-widest">UTF-8</span>
+<span class="font-label text-[9px] text-zinc-500 uppercase tracking-widest">JSON Language Mode</span>
+</div>
+<div class="flex gap-4">
+<span class="font-label text-[9px] text-zinc-500 uppercase tracking-widest">Ln 12, Col 34</span>
+<div class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+<span class="font-label text-[9px] text-emerald-500 uppercase tracking-widest">Connected</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Floating Action Button for Adding New Elements -->
+<div class="fixed bottom-6 right-6 flex flex-col gap-2 z-50">
+<div class="group relative">
+<span class="absolute right-14 top-1/2 -translate-y-1/2 bg-surface-container-highest border border-outline-variant/20 px-3 py-1.5 rounded font-label text-[10px] tracking-widest uppercase text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Open Console</span>
+<button class="w-12 h-12 bg-primary-container rounded-full flex items-center justify-center text-white shadow-xl hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">terminal</span>
+</button>
+</div>
+</div>
+</body></html>
