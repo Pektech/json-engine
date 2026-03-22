@@ -1,0 +1,6 @@
+rules:
+  - id: detect-hardcoded-secrets
+    pattern-regex: (password|passwd|pwd|secret|key|token|api_key)\s*=\s*["'][^"']+["']
+    languages: [javascript, typescript]
+    message: "Potential hardcoded secret detected"
+    severity: ERROR
