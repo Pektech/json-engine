@@ -15,6 +15,8 @@ interface AppState {
   expandedNodes: Set<string>
   validationErrors: ValidationError[]
   isValidating: boolean
+  searchQuery: string
+  filteredNodeIds: Set<string>
 }
 
 interface AppActions {
@@ -26,6 +28,8 @@ interface AppActions {
   getSelectedNode: () => CanvasNode | undefined
   validateJson: () => void
   updateValidationErrors: (errors: ValidationError[]) => void
+  setSearchQuery: (query: string) => void
+  getFilteredNodes: () => CanvasNode[]
 }
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
@@ -41,6 +45,8 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   expandedNodes: new Set(['root']),
   validationErrors: [],
   isValidating: false,
+  searchQuery: '',
+  filteredNodeIds: new Set(),
 
   setJsonText: (text: string) => {
     set({ jsonText: text, isDirty: true, validationErrors: [] })
@@ -134,5 +140,42 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
 
   updateValidationErrors: (errors: ValidationError[]) => {
     set({ validationErrors: errors })
+  },
+
+  setSearchQuery: (query: string) => {
+    const { nodes } = get()
+    
+    if (!query.trim()) {
+      set({ searchQuery: '', filteredNodeIds: new Set() })
+      return
+    }
+    
+    const lowerQuery = query.toLowerCase()
+    const filteredIds = new Set(
+      nodes
+        .filter(node => 
+          node.data.label.toLowerCase().includes(lowerQuery) ||
+          (node.data.value && node.data.value.toLowerCase().includes(lowerQuery))
+        )
+        .map(node => node.id)
+    )
+    
+    set({ searchQuery: query, filteredNodeIds: filteredIds })
+  },
+
+  getFilteredNodes: () => {
+    const { nodes, searchQuery, filteredNodeIds } = get()
+    
+    if (!searchQuery) {
+      return nodes
+    }
+    
+    return nodes.map(node => ({
+      ...node,
+      style: {
+        ...node.style,
+        opacity: filteredNodeIds.has(node.id) ? 1 : 0.2,
+      },
+    }))
   },
 }))

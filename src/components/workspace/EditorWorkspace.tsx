@@ -5,6 +5,7 @@ import { NodeCanvas } from '@/components/canvas/NodeCanvas'
 import { CodeEditor } from '@/components/editor/CodeEditor'
 import { EditorToolbar } from '@/components/editor/EditorToolbar'
 import { ErrorPanel } from '@/components/panels/ErrorPanel'
+import { SearchBar } from '@/components/canvas/SearchBar'
 import { useAppStore } from '@/store/app-store'
 import type { CodeEditorHandle } from '@/components/editor/CodeEditor'
 
@@ -19,8 +20,11 @@ export function EditorWorkspace() {
     edges,
     selectedPath,
     parseError,
+    searchQuery,
+    filteredNodeIds,
     setJsonText,
     selectPath,
+    setSearchQuery,
   } = useAppStore()
 
   const parsedJson = useAppStore(state => state.parsedJson)
@@ -71,10 +75,18 @@ export function EditorWorkspace() {
         onMouseMove={handleDrag}
       >
         <div 
-          className="h-full overflow-hidden"
+          className="h-full overflow-hidden relative"
           style={{ width: `${canvasWidth}%` }}
         >
-          <div className="w-full h-full bg-surface canvas-grid border-r border-outline-variant/10">
+          <div className="absolute top-4 left-4 right-4 z-10">
+            <SearchBar
+              query={searchQuery}
+              onSearch={setSearchQuery}
+              matchCount={filteredNodeIds.size}
+              totalCount={nodes.length}
+            />
+          </div>
+          <div className="w-full h-full bg-surface canvas-grid border-r border-outline-variant/10 pt-16">
             {nodes.length > 0 ? (
               <NodeCanvas
                 json={parsedJson}
