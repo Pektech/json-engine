@@ -1,0 +1,31 @@
+{
+  "project": {
+    "name": "JSON.engine",
+    "created": "2026-03-22",
+    "mode": "yolo",
+    "granularity": "standard",
+    "parallelization": true,
+    "commit_docs": true
+  },
+  "workflow": {
+    "research": true,
+    "plan_check": true,
+    "verifier": true,
+    "nyquist_validation": true,
+    "auto_advance": true,
+    "_auto_chain_active": false
+  },
+  "agents": {
+    "model_profile": "balanced",
+    "researcher_model": "sonnet",
+    "synthesizer_model": "sonnet",
+    "roadmapper_model": "sonnet"
+  },
+  "project_root": "/media/richard-leddy/extra/json_editor_openclaw",
+  "paths": {
+    "project": ".planning/PROJECT.md",
+    "requirements": ".planning/REQUIREMENTS.md",
+    "roadmap": ".planning/ROADMAP.md",
+    "state": ".planning/STATE.md"
+  }
+}
