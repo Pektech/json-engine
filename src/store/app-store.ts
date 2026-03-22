@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import { jsonToGraph, layoutGraph } from '@/lib/json-to-graph'
+import { validationService } from '@/lib/validation'
 import type { CanvasNode, CanvasEdge } from '@/types/canvas'
+import type { ValidationError } from '@/types/validation'
 
 interface AppState {
   jsonText: string
@@ -11,6 +13,8 @@ interface AppState {
   parseError: string | null
   isDirty: boolean
   expandedNodes: Set<string>
+  validationErrors: ValidationError[]
+  isValidating: boolean
 }
 
 interface AppActions {
@@ -20,6 +24,8 @@ interface AppActions {
   expandNode: (id: string) => void
   collapseNode: (id: string) => void
   getSelectedNode: () => CanvasNode | undefined
+  validateJson: () => void
+  updateValidationErrors: (errors: ValidationError[]) => void
 }
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
@@ -33,9 +39,11 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   parseError: null,
   isDirty: false,
   expandedNodes: new Set(['root']),
+  validationErrors: [],
+  isValidating: false,
 
   setJsonText: (text: string) => {
-    set({ jsonText: text, isDirty: true })
+    set({ jsonText: text, isDirty: true, validationErrors: [] })
 
     if (debounceTimer) {
       clearTimeout(debounceTimer)
@@ -64,9 +72,18 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
           edges: visibleEdges, 
           parseError: null,
         })
+        
+        get().validateJson()
       } catch (error) {
         set({ 
           parseError: error instanceof Error ? error.message : 'Invalid JSON',
+          validationErrors: [{
+            path: 'root',
+            line: 1,
+            column: 1,
+            message: error instanceof Error ? error.message : 'Invalid JSON',
+            severity: 'error',
+          }],
         })
       }
     }, 100)
@@ -101,5 +118,21 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   getSelectedNode: () => {
     const { nodes, selectedPath } = get()
     return nodes.find(node => node.id === selectedPath)
+  },
+
+  validateJson: () => {
+    const { jsonText } = get()
+    set({ isValidating: true })
+    
+    try {
+      const errors = validationService.validateJsonString(jsonText)
+      set({ validationErrors: errors, isValidating: false })
+    } catch {
+      set({ isValidating: false })
+    }
+  },
+
+  updateValidationErrors: (errors: ValidationError[]) => {
+    set({ validationErrors: errors })
   },
 }))
