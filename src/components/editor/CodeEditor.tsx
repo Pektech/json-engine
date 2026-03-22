@@ -4,6 +4,7 @@ import { useRef, useCallback, forwardRef, useImperativeHandle, useEffect } from 
 import Editor, { useMonaco } from '@monaco-editor/react'
 import type { editor } from 'monaco-editor'
 import { pathToLine, lineToPath } from '@/lib/path-to-line'
+import { useAppStore } from '@/store/app-store'
 
 interface CodeEditorProps {
   value: string
@@ -26,6 +27,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
   ) {
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
     const monaco = useMonaco()
+    const validationErrors = useAppStore(state => state.validationErrors)
     
     useImperativeHandle(ref, () => ({
       format: () => {
@@ -37,6 +39,27 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
         return lineToPath(value, line)
       },
     }))
+    
+    useEffect(() => {
+      if (monaco && editorRef.current) {
+        const model = editorRef.current.getModel()
+        if (model) {
+          const markers = validationErrors.map((error): editor.IMarkerData => ({
+            severity: error.severity === 'error' 
+              ? monaco.MarkerSeverity.Error 
+              : monaco.MarkerSeverity.Warning,
+            message: error.message,
+            startLineNumber: error.line,
+            startColumn: error.column,
+            endLineNumber: error.line,
+            endColumn: error.column + 1,
+            source: 'json-validation',
+          }))
+          
+          monaco.editor.setModelMarkers(model, 'validation', markers)
+        }
+      }
+    }, [monaco, validationErrors])
     
     const handleBeforeMount = useCallback(() => {
       if (monaco) {

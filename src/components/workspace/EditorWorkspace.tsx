@@ -4,6 +4,7 @@ import { useRef, useState, useCallback, useEffect } from 'react'
 import { NodeCanvas } from '@/components/canvas/NodeCanvas'
 import { CodeEditor } from '@/components/editor/CodeEditor'
 import { EditorToolbar } from '@/components/editor/EditorToolbar'
+import { ErrorPanel } from '@/components/panels/ErrorPanel'
 import { useAppStore } from '@/store/app-store'
 import type { CodeEditorHandle } from '@/components/editor/CodeEditor'
 
@@ -133,6 +134,8 @@ export function EditorWorkspace() {
               onCursorPositionChange={handleCursorPositionChange}
             />
           </div>
+          
+          <ErrorPanel />
         </div>
       </div>
     </div>
