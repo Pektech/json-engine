@@ -13,9 +13,19 @@ import {
   type ReactFlowInstance,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
+import { JsonNode } from './JsonNode'
+import { JsonEdge } from './JsonEdge'
 import { jsonToGraph } from '@/lib/json-to-graph'
 import { layoutGraph } from '@/lib/graph-layout'
 import type { CanvasNode, CanvasEdge } from '@/types/canvas'
+
+const nodeTypes = {
+  jsonNode: JsonNode,
+}
+
+const edgeTypes = {
+  smoothstep: JsonEdge,
+}
 
 interface NodeCanvasProps {
   json: any
@@ -82,6 +92,8 @@ export function NodeCanvas({ json, onNodeSelect, selectedNodeId }: NodeCanvasPro
         onEdgesChange={onEdgesChange}
         onNodeClick={onNodeClick}
         onInit={onInit}
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         fitView
         attributionPosition="bottom-left"
       >
