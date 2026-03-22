@@ -3,6 +3,8 @@ import { jsonToGraph, layoutGraph } from '@/lib/json-to-graph'
 import { validationService } from '@/lib/validation'
 import type { CanvasNode, CanvasEdge } from '@/types/canvas'
 import type { ValidationError } from '@/types/validation'
+import type { JsonEngineState } from '@/types/persistence'
+import { loadNodePositions, saveNodePositions } from '@/services/node-persistence'
 
 interface AppState {
   jsonText: string
@@ -17,6 +19,9 @@ interface AppState {
   isValidating: boolean
   searchQuery: string
   filteredNodeIds: Set<string>
+  currentFile: string | null
+  nodePositions: Record<string, { x: number; y: number }>
+  userOverrideSave: boolean
 }
 
 interface AppActions {
@@ -30,6 +35,10 @@ interface AppActions {
   updateValidationErrors: (errors: ValidationError[]) => void
   setSearchQuery: (query: string) => void
   getFilteredNodes: () => CanvasNode[]
+  canSave: () => boolean
+  setUserOverrideSave: (override: boolean) => void
+  loadFile: (filePath: string, content: string) => Promise<void>
+  savePositions: () => void
 }
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
@@ -47,6 +56,9 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   isValidating: false,
   searchQuery: '',
   filteredNodeIds: new Set(),
+  currentFile: null,
+  nodePositions: {},
+  userOverrideSave: false,
 
   setJsonText: (text: string) => {
     set({ jsonText: text, isDirty: true, validationErrors: [] })
@@ -100,11 +112,17 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   },
 
   updateNodePosition: (id: string, position: { x: number; y: number }) => {
-    const { nodes } = get()
+    const { nodes, nodePositions } = get()
     const updatedNodes = nodes.map(node =>
       node.id === id ? { ...node, position } : node
     )
-    set({ nodes: updatedNodes })
+    
+    const updatedPositions = { ...nodePositions, [id]: position }
+    set({ nodes: updatedNodes, nodePositions: updatedPositions })
+    
+    setTimeout(() => {
+      get().savePositions()
+    }, 500)
   },
 
   expandNode: (id: string) => {
@@ -177,5 +195,43 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
         opacity: filteredNodeIds.has(node.id) ? 1 : 0.2,
       },
     }))
+  },
+
+  canSave: () => {
+    const { validationErrors, userOverrideSave } = get()
+    return validationErrors.length === 0 || userOverrideSave
+  },
+
+  setUserOverrideSave: (override: boolean) => {
+    set({ userOverrideSave: override })
+  },
+
+  loadFile: async (filePath: string, content: string) => {
+    set({ currentFile: filePath })
+    
+    const persisted = await loadNodePositions(filePath)
+    if (persisted) {
+      set({ nodePositions: persisted.positions })
+    }
+    
+    get().setJsonText(content)
+  },
+
+  savePositions: () => {
+    const { currentFile, nodePositions, expandedNodes } = get()
+    
+    if (!currentFile) return
+    
+    const state: JsonEngineState = {
+      version: '1.0',
+      lastModified: new Date().toISOString(),
+      positions: nodePositions,
+      collapsed: Object.fromEntries(
+        Array.from(expandedNodes).map(id => [id, false])
+      ),
+      view: { zoom: 1, position: { x: 0, y: 0 } },
+    }
+    
+    saveNodePositions(currentFile, state)
   },
 }))
