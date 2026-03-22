@@ -1,6 +1,6 @@
 import { TopAppBar } from '@/components/layout/TopAppBar'
 import { SideNavBar } from '@/components/layout/SideNavBar'
-import { MainWorkspace } from '@/components/layout/MainWorkspace'
+import { EditorWorkspace } from '@/components/workspace/EditorWorkspace'
 
 export default function Home() {
   return (
@@ -8,7 +8,7 @@ export default function Home() {
       <TopAppBar />
       <div className="flex flex-1 overflow-hidden">
         <SideNavBar />
-        <MainWorkspace />
+        <EditorWorkspace />
       </div>
     </div>
   )
