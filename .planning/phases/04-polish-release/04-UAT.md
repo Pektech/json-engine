@@ -1,0 +1,138 @@
+---
+status: complete
+phase: 04-polish-release
+source: [04-01-SUMMARY.md, 04-02-SUMMARY.md, 04-03-SUMMARY.md]
+started: 2026-03-22T13:00:00Z
+updated: 2026-03-22T13:30:00Z
+---
+
+## Current Test
+
+[testing complete]
+
+## Tests
+
+### 1. App loads on port 3030
+expected: Run `npm run dev` and open http://localhost:3030. App shell renders immediately with dark theme, header, sidebar, search bar, and empty canvas.
+result: issue
+reported: "sidebar is there but does not change anything"
+severity: major
+
+### 2. JSON paste draws graph nodes
+expected: Paste valid JSON into editor. Graph canvas should show node cards arranged left-to-right with keys and values displayed. Connections between nodes visible.
+result: pass
+
+### 3. Graph nodes display key-value format
+expected: Each node card shows key (monospace, top) and value (syntax-colored: strings in accent, numbers in primary, booleans in tertiary). Objects/arrays show `{ }` or `[ ]` indicator.
+result: pass
+
+### 4. Search filters graph nodes
+expected: Type in search bar. Matching nodes stay visible (full opacity), non-matching nodes dim (0.2 opacity). Match count displays.
+result: pass
+
+### 5. Search accepts lowercase input
+expected: Type in search bar. Text displays as typed (not forced uppercase).
+result: pass
+
+### 6. JSON editor search box exists and works
+expected: There should be a search box on the JSON editor side (separate from graph search). Typing in it should search the JSON text content and highlight matches in the editor.
+result: issue
+reported: "there are two search boxes. one on the node side which does work and one on the text side which does not"
+severity: major
+
+### 6. JSON editor search box exists and works
+expected: There should be a search box on the JSON editor side (separate from graph search). Typing in it should search the JSON text content and highlight matches in the editor.
+result: issue
+reported: "there are two search boxes. one on the node side which does work and one on the text side which does not"
+severity: major
+
+### 7. Cursor stays in place while typing
+expected: Type or edit JSON values. Cursor remains at insertion point, doesn't jump to top of file.
+result: pass
+
+### 8. Keyboard shortcuts help panel
+expected: Press F1 or click keyboard icon. Help panel shows all available shortcuts (Ctrl+O, Ctrl+S, Ctrl+Shift+F, Ctrl+K).
+result: issue
+reported: "f1 opens google support page. ctrl+s saves JSON.engine.html file. ctrl+shift+f does nothing. ctrl+k works (focuses node search). header icons do nothing except info icon which crashes with: Error: Rendered more hooks than during the previous render in KeyboardShortcutsHelp.tsx:26"
+severity: blocker
+
+### 8a. Keyboard shortcuts functional
+expected: Keyboard shortcuts should work:
+- Ctrl+O: Open file dialog
+- Ctrl+S: Trigger app save (not browser save)
+- Ctrl+Shift+F: Trigger canvas search
+- Ctrl+K: Focus search bar (working)
+result: issue
+reported: "Ctrl+K works. F1 opens browser help. Ctrl+S triggers browser save. Ctrl+Shift+F does nothing."
+severity: major
+
+### 9. Node selection highlights in both views
+expected: Click a graph node. Node gets primary border highlight. Corresponding JSON location is revealed in editor.
+result: issue
+reported: "clicked node does not highlight, json editor does not reveals/focuses the corresponding location, ediotr does not scroll to show the selected path"
+severity: major
+
+### 10. JSON edit updates graph in real-time
+expected: Change a value in JSON editor. Graph node updates to show new value without refresh.
+result: pass
+
+## Summary
+
+total: 11
+passed: 6
+issues: 5
+pending: 0
+skipped: 0
+blocked: 0
+
+## Gaps
+
+- truth: "App shell renders with functional sidebar navigation that switches views"
+  status: failed
+  reason: "User reported: sidebar is there but does not change anything"
+  severity: major
+  test: 1
+  root_cause: ""
+  artifacts: []
+  missing: []
+  debug_session: ""
+
+- truth: "JSON editor side has working search box that searches text content and highlights matches"
+  status: failed
+  reason: "User reported: there are two search boxes. one on the node side which does work and one on the text side which does not"
+  severity: major
+  test: 6
+  root_cause: ""
+  artifacts: []
+  missing: []
+  debug_session: ""
+
+- truth: "Keyboard shortcuts help panel accessible via F1 or header icon"
+  status: failed
+  reason: "User reported: f1 opens google support page. ctrl+s saves JSON.engine.html file. ctrl+shift+f does nothing. ctrl+k works (focuses node search). header icons do nothing except info icon which crashes with: Error: Rendered more hooks than during the previous render in KeyboardShortcutsHelp.tsx:26"
+  severity: blocker
+  test: 8
+  root_cause: ""
+  artifacts: []
+  missing: []
+  debug_session: ""
+
+- truth: "Keyboard shortcuts work correctly (Ctrl+O open, Ctrl+S save, Ctrl+Shift+F search)"
+  status: failed
+  reason: "User reported: Ctrl+K works. F1 opens browser help. Ctrl+S triggers browser save. Ctrl+Shift+F does nothing."
+  severity: major
+  test: 8a
+  root_cause: ""
+  artifacts: []
+  missing: []
+  debug_session: ""
+
+- truth: "Node selection highlights node and reveals corresponding JSON location in editor"
+  status: failed
+  reason: "User reported: clicked node does not highlight, json editor does not reveals/focuses the corresponding location, ediotr does not scroll to show the selected path"
+  severity: major
+  test: 9
+  root_cause: ""
+  artifacts: []
+  missing: []
+  debug_session: ""
