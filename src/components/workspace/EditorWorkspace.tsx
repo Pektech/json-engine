@@ -1,51 +1,41 @@
 'use client'
 
 import { Suspense, useMemo } from 'react'
-import dynamic from 'next/dynamic'
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { EditorToolbar } from '@/components/editor/EditorToolbar'
 import { ErrorPanel } from '@/components/panels/ErrorPanel'
 import { SearchBar } from '@/components/canvas/SearchBar'
 import { useAppStore } from '@/store/app-store'
+import { useViewStore } from '@/stores/viewStore'
+import { CodeEditor, type CodeEditorHandle } from '@/components/editor/CodeEditor'
+import { NodeCanvas } from '@/components/canvas/NodeCanvas'
 import { CodeEditorLoader } from '@/components/editor/CodeEditorLoader'
 import { NodeCanvasLoader } from '@/components/canvas/NodeCanvasLoader'
+import { fileManager } from '@/lib/file-manager'
 
-// Dynamically import heavy components with SSR disabled and proper loading states
-const CodeEditor = dynamic(() => import('@/components/editor/CodeEditor'), {
-  ssr: false,
-  loading: () => <CodeEditorLoader />,
-  // Note: For ref forwarding with dynamic imports, we'll handle differently
-});
-
-// Wrapper to manage ref handling since dynamic components can't use forwardRef directly
-const CodeEditorWithRefHandling = ({ onInitialize }: { onInitialize?: (editorRef: any) => void }) => {
-  // Simple component to allow initialization from dynamic import  
+// Lazy wrappers for loading states
+function CodeEditorLazy(props: React.ComponentProps<typeof CodeEditor>) {
   return (
     <Suspense fallback={<CodeEditorLoader />}>
-      <CodeEditor
-        value={useAppStore(state => state.jsonText)}
-        onChange={(newVal) => useAppStore.getState().setJsonText(newVal || '')}
-        onValidate={() => {}}
-        selectedPath={useAppStore(state => state.selectedPath)}
-        onCursorPositionChange={(path) => {
-          if (path) {
-            useAppStore.getState().selectPath(path)
-          }
-        }}
-      />
+      <CodeEditor {...props} />
     </Suspense>
-  );
-};
+  )
+}
 
-const NodeCanvasDynamic = dynamic(() => import('@/components/canvas/NodeCanvas'), {
-  ssr: false,
-  loading: () => <NodeCanvasLoader />,
-});
+function NodeCanvasLazy(props: React.ComponentProps<typeof NodeCanvas>) {
+  return (
+    <Suspense fallback={<NodeCanvasLoader />}>
+      <NodeCanvas {...props} />
+    </Suspense>
+  )
+}
 
 export function EditorWorkspace() {
-  const editorFunctionsRef = useRef<{ format: () => void } | null>(null);  // Simplified ref alternative
+  const editorRef = useRef<CodeEditorHandle | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [canvasWidth, setCanvasWidth] = useState(60)
+  
+  const { activeView } = useViewStore()
   
   const {
     jsonText,
@@ -67,12 +57,38 @@ export function EditorWorkspace() {
   }, [selectPath])
 
   const handleFormat = useCallback(() => {
-    // For this version, we're avoiding ref complexity with dynamic components
+    editorRef.current?.format()
   }, [])
 
+  const handleEditorSearch = useCallback(() => {
+    editorRef.current?.find()
+  }, [])
+
+  const handleOpenFile = useCallback(async () => {
+    try {
+      const result = await fileManager.openFile();
+      
+      // Check if result is an error (has 'code' property)
+      if ('code' in result) {
+        if (result.code !== 'PERMISSION_DENIED') {
+          console.error('Failed to open file:', result.message);
+        }
+        return;
+      }
+      
+      // Successfully opened - load into editor using getState to avoid dependency issues
+      const { loadFile: appLoadFile } = useAppStore.getState();
+      await appLoadFile(result.handle.name, result.content);
+    } catch (error) {
+      console.error('Failed to open file:', error);
+    }
+  }, []);
+
   const handleCursorPositionChange = useCallback((path: string | null) => {
+    console.log('[EditorWorkspace] Received path from editor:', path)
     if (path) {
       selectPath(path)
+      console.log('[EditorWorkspace] Called selectPath with:', path)
     }
   }, [selectPath])
 
@@ -99,6 +115,18 @@ export function EditorWorkspace() {
     return () => window.removeEventListener('mouseup', handleMouseUp)
   }, [])
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        const searchInput = document.querySelector<HTMLInputElement>('[data-workspace-search="true"]')
+        searchInput?.focus()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
   const validationMarkers = parseError ? [{ message: parseError }] : []
 
   return (
@@ -107,84 +135,107 @@ export function EditorWorkspace() {
         className="relative flex w-full h-full"
         onMouseMove={handleDrag}
       >
-        <div 
-          className="h-full overflow-hidden relative"
-          style={{ width: `${canvasWidth}%` }}
-        >
-          <div className="absolute top-4 left-4 right-4 z-10">
-            <SearchBar
-              query={searchQuery}
-              onSearch={setSearchQuery}
-              matchCount={filteredNodeIds.size}
-              totalCount={nodes.length}
-            />
-          </div>
-          <div className="w-full h-full bg-surface canvas-grid border-r border-outline-variant/10 pt-16">
-            {nodes.length > 0 ? (
-              <Suspense fallback={<NodeCanvasLoader />}>
-                <NodeCanvasDynamic
+        {/* Canvas Panel - shown in 'canvas' or 'split' view */}
+        {(activeView === 'canvas' || activeView === 'split') && (
+          <div 
+            className="h-full overflow-hidden relative transition-all duration-300 ease-in-out"
+            style={{ width: activeView === 'canvas' ? '100%' : `${canvasWidth}%` }}
+          >
+            <div className="absolute top-4 left-4 right-4 z-10">
+              <SearchBar
+                query={searchQuery}
+                onSearch={setSearchQuery}
+                matchCount={filteredNodeIds.size}
+                totalCount={nodes.length}
+              />
+            </div>
+            <div className="w-full h-full bg-surface canvas-grid border-r border-outline-variant/10 pt-16">
+              {nodes.length > 0 ? (
+                <NodeCanvasLazy
                   json={parsedJson}
-                  nodes={nodes}
-                  edges={edges}
                   selectedNodeId={selectedPath}
                   onNodeSelect={handleNodeSelect}
+                  searchQuery={searchQuery}
+                  filteredNodeIds={Array.from(filteredNodeIds)}
                 />
-              </Suspense>
-            ) : (
-              <div className="flex items-center justify-center h-full text-zinc-500">
-                <div className="text-center">
-                  <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <p className="font-label text-sm tracking-widest uppercase">No JSON loaded</p>
-                  <p className="text-xs mt-2 opacity-50">Open a file or paste JSON to begin</p>
+              ) : (
+                <div className="flex items-center justify-center h-full text-zinc-500">
+                  <div className="text-center">
+                    <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p className="font-label text-sm tracking-widest uppercase">No JSON loaded</p>
+                    <p className="text-xs mt-2 opacity-50">Open a file or paste JSON to begin</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Drag Handle - only in split view */}
+        {activeView === 'split' && (
+          <div
+            className="w-1 cursor-col-resize bg-outline-variant/30 hover:bg-primary/50 transition-colors z-10"
+            onMouseDown={handleDragStart}
+            onMouseUp={handleDragEnd}
+          />
+        )}
+
+        {/* Editor Panel - shown in 'editor' or 'split' view */}
+        {(activeView === 'editor' || activeView === 'split') && (
+          <div 
+            className="flex flex-col h-full bg-surface-container-lowest transition-all duration-300 ease-in-out"
+            style={{ width: activeView === 'editor' ? '100%' : `${100 - canvasWidth}%` }}
+          >
+            <EditorToolbar
+              onOpen={handleOpenFile}
+              onFormat={handleFormat}
+              onSearch={handleEditorSearch}
+              errorCount={parseError ? 1 : 0}
+              warningCount={validationMarkers.length}
+              currentPath={selectedPath}
+            />
+            
+            {parseError && (
+              <div className="px-4 py-2 bg-error-container/20 border-b border-error/30">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-error"></span>
+                  <span className="text-sm text-error font-mono">{parseError}</span>
                 </div>
               </div>
             )}
-          </div>
-        </div>
-
-        <div
-          className="w-1 cursor-col-resize bg-outline-variant/30 hover:bg-primary/50 transition-colors z-10"
-          onMouseDown={handleDragStart}
-          onMouseUp={handleDragEnd}
-        />
-
-        <div 
-          className="flex flex-col h-full bg-surface-container-lowest"
-          style={{ width: `${100 - canvasWidth}%` }}
-        >
-          <EditorToolbar
-            onFormat={handleFormat}
-            onSearch={() => {}}
-            errorCount={parseError ? 1 : 0}
-            warningCount={validationMarkers.length}
-            currentPath={selectedPath}
-          />
-          
-          {parseError && (
-            <div className="px-4 py-2 bg-error-container/20 border-b border-error/30">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-error"></span>
-                <span className="text-sm text-error font-mono">{parseError}</span>
-              </div>
+            
+            <div className="flex-1 overflow-hidden">
+              <Suspense fallback={<CodeEditorLoader />}>
+                <CodeEditor
+                  ref={editorRef}
+                  value={jsonText}
+                  onChange={setJsonText}
+                  onValidate={() => {}}
+                  selectedPath={selectedPath}
+                  onCursorPositionChange={handleCursorPositionChange}
+                />
+              </Suspense>
             </div>
-          )}
-          
-          <div className="flex-1 overflow-hidden">
-            <Suspense fallback={<CodeEditorLoader />}>
-              <CodeEditor
-                value={jsonText}
-                onChange={setJsonText}
-                onValidate={() => {}}
-                selectedPath={selectedPath}
-                onCursorPositionChange={handleCursorPositionChange}
-              />
-            </Suspense>
+            
+            <ErrorPanel />
           </div>
-          
-          <ErrorPanel />
-        </div>
+        )}
+
+        {/* Settings Panel - shown only in 'settings' view */}
+        {activeView === 'settings' && (
+          <div className="flex flex-col h-full bg-surface-container-lowest w-full items-center justify-center p-8">
+            <div className="text-center text-zinc-500">
+              <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <p className="font-label text-sm tracking-widest uppercase">Settings</p>
+              <p className="text-xs mt-2 opacity-50">Configuration options will be available here</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

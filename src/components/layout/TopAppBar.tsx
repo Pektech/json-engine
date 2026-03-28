@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { KeyboardShortcutsHelp } from './KeyboardShortcutsHelp'
 
 export function TopAppBar() {
-  const [searchQuery, setSearchQuery] = useState('')
   const [showHelp, setShowHelp] = useState(false)
 
   return (
@@ -36,28 +35,6 @@ export function TopAppBar() {
           </nav>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center bg-surface-container-low px-3 py-1 rounded border border-outline-variant/20 gap-2">
-            <svg 
-              className="w-4 h-4 text-zinc-500" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
-              />
-            </svg>
-            <input 
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent border-none outline-none text-xs w-48 font-label uppercase tracking-widest focus:ring-0 placeholder-zinc-600 text-on-surface"
-              placeholder="Search nodes..."
-            />
-          </div>
           <div className="flex gap-2">
             <button 
               className="p-2 hover:bg-zinc-800/50 transition-all scale-95 active:scale-90 duration-100 text-zinc-400"

@@ -2,8 +2,9 @@
 
 import { useRef, useCallback, forwardRef, useImperativeHandle, useEffect } from 'react'
 import Editor, { useMonaco } from '@monaco-editor/react'
+import * as monaco from 'monaco-editor'
 import type { editor } from 'monaco-editor'
-import { pathToLine, lineToPath } from '@/lib/path-to-line'
+import { pathToLine, lineToPath, findPathByKeyLabel } from '@/lib/path-to-line'
 import { useAppStore } from '@/store/app-store'
 import { useFocusContext } from '@/hooks/useFocusContext'
 
@@ -19,6 +20,7 @@ interface CodeEditorProps {
 export interface CodeEditorHandle {
   format: () => void
   getPathAtLine: (line: number) => string | null
+  find: () => void
 }
 
 export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
@@ -27,6 +29,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     ref
   ) {
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
+  const decorationIdsRef = useRef<string[]>([])
   const monaco = useMonaco()
   const validationErrors = useAppStore(state => state.validationErrors)
   const { setFocusedArea } = useFocusContext()
@@ -39,6 +42,11 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     },
     getPathAtLine: (line: number) => {
       return lineToPath(value, line)
+    },
+    find: () => {
+      if (editorRef.current) {
+        editorRef.current.trigger('keyboard', 'actions.find', {})
+      }
     },
   }))
   
@@ -87,7 +95,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     
     const handleBeforeMount = useCallback(() => {
       if (monaco) {
-        monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+        (monaco.languages.json as any).jsonDefaults.setDiagnosticsOptions({
           validate: true,
           allowComments: false,
           schemas: [],
@@ -99,15 +107,68 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       (editor: editor.IStandaloneCodeEditor) => {
         editorRef.current = editor
         
-        editor.onDidChangeCursorPosition(() => {
+        // Get full JSON text from the editor model, not from props
+        const getFullJsonText = () => {
+          const model = editor.getModel()
+          return model ? model.getValue() : ''
+        }
+        
+        // Update selection when cursor position changes
+        const updateSelectionFromCursor = () => {
           const position = editor.getPosition()
-          if (position && onCursorPositionChange) {
-            const path = lineToPath(value, position.lineNumber)
-            onCursorPositionChange(path)
+          if (!position || !onCursorPositionChange) return
+          
+          // Get full JSON text directly from editor model
+          const fullJsonText = getFullJsonText()
+          console.log('[CodeEditor] Full JSON length:', fullJsonText.length, 'chars')
+          
+          // Get the word at the cursor position (the key name)
+          const model = editor.getModel()
+          if (!model) return
+          
+          const wordInfo = model.getWordAtPosition(position)
+          console.log('[CodeEditor] Cursor:', position.lineNumber, ':', position.column, 'Word:', wordInfo?.word)
+          
+          if (!wordInfo || !wordInfo.word) {
+            // No word at cursor, fall back to line-based path
+            const path = lineToPath(fullJsonText, position.lineNumber)
+            console.log('[CodeEditor] No word, using line-based path:', path)
+            if (path) onCursorPositionChange(path)
+            return
           }
-        })
+          
+          // Get the line content to determine if this is a key or value
+          const lineContent = model.getLineContent(position.lineNumber)
+          const isKey = lineContent.includes(`"${wordInfo.word}"`) && 
+                        lineContent.indexOf(`"${wordInfo.word}"`) <= position.column
+          
+          console.log('[CodeEditor] Is key?', isKey, 'Line content:', lineContent.substring(0, 50))
+          
+          if (isKey) {
+            // This is a key, find the full path to this key
+            console.log('[CodeEditor] Calling findPathByKeyLabel with JSON length:', fullJsonText.length)
+            const path = findPathByKeyLabel(fullJsonText, wordInfo.word, position.lineNumber)
+            console.log('[CodeEditor] Found path for key "', wordInfo.word, '":', path)
+            if (path) {
+              onCursorPositionChange(path)
+            } else {
+              // Fallback to line-based
+              const fallbackPath = lineToPath(fullJsonText, position.lineNumber)
+              console.log('[CodeEditor] No path found, fallback:', fallbackPath)
+              if (fallbackPath) onCursorPositionChange(fallbackPath)
+            }
+          } else {
+            // This is a value, use line-based path
+            const path = lineToPath(fullJsonText, position.lineNumber)
+            console.log('[CodeEditor] Value, using line-based:', path)
+            if (path) onCursorPositionChange(path)
+          }
+        }
+        
+        // Listen to cursor changes (typing, arrow keys, clicks)
+        editor.onDidChangeCursorPosition(updateSelectionFromCursor)
       },
-      [value, onCursorPositionChange]
+      [onCursorPositionChange]
     )
     
     const handleChange = useCallback(
@@ -129,16 +190,30 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     )
     
     useEffect(() => {
-      if (editorRef.current && selectedPath) {
-        const location = pathToLine(value, selectedPath)
-        if (location) {
-          editorRef.current.revealLineInCenter(location.line)
-          editorRef.current.setPosition({
-            lineNumber: location.line,
-            column: location.column,
-          })
-        }
-      }
+      if (!editorRef.current || !selectedPath || !value) return
+
+      const location = pathToLine(value, selectedPath)
+      if (!location || !location.line || !location.column) return
+
+      // Scroll to show the selected line, but don't move cursor
+      // (cursor position should only change from user typing/clicking)
+      editorRef.current.revealLinesInCenter(location.line, location.line)
+
+      const decorations = [
+        {
+          range: new monaco!.Range(location.line, 1, location.line, 1),
+          options: {
+            isWholeLine: true,
+            className: 'selected-line-highlight',
+            linesDecorationsClassName: 'selected-line-margin',
+          },
+        },
+      ]
+
+      decorationIdsRef.current = editorRef.current.deltaDecorations(
+        decorationIdsRef.current || [],
+        decorations
+      )
     }, [selectedPath, value])
     
     return (

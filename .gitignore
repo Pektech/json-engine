@@ -82,3 +82,20 @@ temp/
 # /test-results/
 # /playwright-report/
 # /playwright/.cache/
+
+# ── GSD baseline (auto-generated) ──
+.gsd
+*.code-workspace
+.env.*
+!.env.example
+node_modules/
+.next/
+dist/
+build/
+__pycache__/
+*.pyc
+.venv/
+venv/
+target/
+vendor/
+coverage/

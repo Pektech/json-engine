@@ -6,6 +6,7 @@ export interface JsonNodeData {
   value?: string
   depth: number
   path: string
+  isSelected?: boolean
 }
 
 export interface CanvasNode {
@@ -15,6 +16,10 @@ export interface CanvasNode {
   data: JsonNodeData
   width?: number
   height?: number
+  style?: {
+    opacity?: number;
+    [key: string]: any;
+  }
 }
 
 export interface CanvasEdge {

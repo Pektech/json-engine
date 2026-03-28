@@ -1,15 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { Handle, Position, type NodeProps } from '@xyflow/react'
-import { NodeTypeBadge } from './NodeTypeBadge'
+import { Handle, Position } from '@xyflow/react'
 import { useAppStore } from '@/store/app-store'
 import type { JsonNodeData } from '@/types/canvas'
 
-export function JsonNode({ data, selected }: NodeProps<JsonNodeData>) {
-  const { type, label, value, path } = data
+export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boolean }) {
+  const jsonNodeData = data as unknown as JsonNodeData
+  const { type, label, value, path } = jsonNodeData
   const [isExpanded, setIsExpanded] = useState(true)
   const validationErrors = useAppStore(state => state.validationErrors)
+  
+  const isSelected = data.isSelected ?? selected
   
   const nodeErrors = validationErrors.filter(error => 
     error.path === path || error.path.startsWith(path + '.') || error.path.startsWith(path + '[')
@@ -18,56 +20,71 @@ export function JsonNode({ data, selected }: NodeProps<JsonNodeData>) {
   
   const handleDoubleClick = () => {
     setIsExpanded(!isExpanded)
-    console.log('Node double-clicked:', data.path, 'Expanded:', !isExpanded)
   }
+  
+  const isExpandable = type === 'object' || type === 'array'
   
   return (
     <div
       onDoubleClick={handleDoubleClick}
+      style={{ opacity: (data as any).opacity ?? 1 }}
       className={`
-        w-[180px] bg-surface-container-high border-2 rounded-lg shadow-md p-3 cursor-pointer
-        transition-all duration-200 relative
-        ${selected ? 'border-primary ring-2 ring-primary ring-offset-2 ring-offset-surface' : 'border-outline-variant'}
-        ${hasErrors ? 'border-error' : ''}
+        min-w-[200px] max-w-[320px] rounded-lg border shadow-sm cursor-pointer
+        transition-all duration-150 relative
+        ${isSelected 
+          ? 'border-primary ring-2 ring-primary/50 bg-surface-container-high' 
+          : 'border-outline-variant/30 bg-surface-container'
+        }
+        ${hasErrors ? 'border-error/50' : ''}
+        hover:border-primary/30
       `}
     >
-      <Handle type="target" position={Position.Top} className="!bg-outline !w-2 !h-2" />
+      <Handle 
+        type="target" 
+        position={Position.Left} 
+        className="!w-2 !h-2 !bg-outline-variant !border-0" 
+      />
       
       {hasErrors && (
-        <div className="absolute -top-1 -right-1 w-5 h-5 bg-error rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm">
+        <div className="absolute -top-1 -right-1 w-4 h-4 bg-error rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-sm z-10">
           {nodeErrors.length}
         </div>
       )}
       
-      <div className="flex flex-col gap-2">
-        <div className="font-semibold text-sm text-on-surface truncate" title={label}>
-          {label}
-        </div>
-        
-        <div className="flex items-center justify-between">
-          <NodeTypeBadge type={type} size="sm" />
-          
-          {(type === 'object' || type === 'array') && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                setIsExpanded(!isExpanded)
-              }}
-              className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
-            >
-              {isExpanded ? '▼' : '▶'}
-            </button>
+      <div className="px-3 py-2">
+        <div className="flex items-center gap-2 mb-1.5">
+          <span className="font-mono text-sm text-secondary font-medium truncate" title={label}>
+            {label}
+          </span>
+          {isExpandable && (
+            <span className="text-[10px] text-zinc-500">
+              {isExpanded ? '◢' : '◣'}
+            </span>
           )}
         </div>
         
-        {value !== undefined && value !== null && (
-          <div className="text-xs text-tertiary font-mono truncate" title={String(value)}>
-            {String(value).slice(0, 30)}{String(value).length > 30 ? '...' : ''}
+        {value !== undefined && value !== null ? (
+          <div className={`font-mono text-xs ${
+            type === 'string' ? 'text-accent' :
+            type === 'number' ? 'text-primary' :
+            type === 'boolean' ? 'text-tertiary' :
+            'text-zinc-400'
+          }`}>
+            {type === 'string' ? `"${String(value).slice(0, 40)}${String(value).length > 40 ? '...' : ''}"` : 
+             String(value)}
           </div>
-        )}
+        ) : isExpandable ? (
+          <div className="text-[10px] text-zinc-500 italic">
+            {type === 'object' ? '{ }' : '[ ]'}
+          </div>
+        ) : null}
       </div>
       
-      <Handle type="source" position={Position.Bottom} className="!bg-outline !w-2 !h-2" />
+      <Handle 
+        type="source" 
+        position={Position.Right} 
+        className="!w-2 !h-2 !bg-outline-variant !border-0" 
+      />
     </div>
   )
 }

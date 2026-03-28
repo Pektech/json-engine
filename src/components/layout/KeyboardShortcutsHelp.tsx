@@ -6,15 +6,7 @@ interface KeyboardShortcutsHelpProps {
 }
 
 export function KeyboardShortcutsHelp({ isOpen = false, onClose }: KeyboardShortcutsHelpProps) {
-  const [visible, setVisible] = useState(isOpen);
-
-  useEffect(() => {
-    setVisible(isOpen);
-  }, [isOpen]);
-
-  if (!visible) {
-    return null;
-  }
+  const [visible, setVisible] = useState(false);
 
   const handleClose = () => {
     setVisible(false);
@@ -22,6 +14,10 @@ export function KeyboardShortcutsHelp({ isOpen = false, onClose }: KeyboardShort
       onClose();
     }
   };
+
+  useEffect(() => {
+    setVisible(isOpen);
+  }, [isOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -32,7 +28,11 @@ export function KeyboardShortcutsHelp({ isOpen = false, onClose }: KeyboardShort
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [handleClose]);
+
+  if (!visible) {
+    return null;
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md">

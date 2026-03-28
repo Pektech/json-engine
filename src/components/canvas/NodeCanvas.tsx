@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import {
   ReactFlow,
   Controls,
   MiniMap,
   Background,
-  useNodesState,
-  useEdgesState,
+  useReactFlow,
+  ReactFlowProvider,
   type Node,
   type Edge,
 } from '@xyflow/react'
@@ -15,25 +15,31 @@ import '@xyflow/react/dist/style.css'
 import { JsonNode } from './JsonNode'
 import { JsonEdge } from './JsonEdge'
 import { jsonToGraph } from '@/lib/json-to-graph'
-import { layoutGraph } from '@/lib/graph-layout'
+import { layoutGraph } from '@/lib/json-to-graph'
 import { useFocusContext } from '@/hooks/useFocusContext'
-
-const nodeTypes = {
-  jsonNode: JsonNode,
-}
-
-const edgeTypes = {
-  smoothstep: JsonEdge,
-}
 
 interface NodeCanvasProps {
   json: any
   onNodeSelect?: (id: string) => void  
   selectedNodeId?: string | null
+  searchQuery?: string
+  filteredNodeIds?: string[]
 }
 
-export function NodeCanvas({ json, onNodeSelect, selectedNodeId }: NodeCanvasProps) {
+const nodeTypes = {
+  jsonNode: JsonNode,
+}
+
+const defaultEdgeOptions = {
+  type: 'smoothstep',
+  style: { stroke: '#404751', strokeWidth: 1.5 },
+  animated: false,
+}
+
+function NodeCanvasContent({ json, onNodeSelect, selectedNodeId, searchQuery = '', filteredNodeIds = [] }: NodeCanvasProps) {
   const { setFocusedArea } = useFocusContext()
+  const { fitView, setCenter, getZoom } = useReactFlow()
+  const previousSelectedNodeId = useRef<string | null>(null)
   
   const graphData = useMemo(() => {
     return jsonToGraph(json)
@@ -43,15 +49,23 @@ export function NodeCanvas({ json, onNodeSelect, selectedNodeId }: NodeCanvasPro
     return layoutGraph(graphData.nodes, graphData.edges)
   }, [graphData])
   
+  const hasSearch = searchQuery.length > 0
+  
   const [existingNodes, setNodes] = useState<Node[]>([])
   const [existingEdges, setEdges] = useState<Edge[]>([])
   
   useEffect(() => {
+    const filteredSet = new Set(filteredNodeIds)
+    
     const flowNodes: any[] = layoutedNodes.map((node) => ({
       id: node.id,
       type: node.type,
       position: node.position,
-      data: node.data,
+      data: { 
+        ...node.data, 
+        opacity: hasSearch ? (filteredSet.has(node.id) ? 1 : 0.2) : 1,
+        isSelected: node.id === selectedNodeId,
+      },
       width: node.width,
       height: node.height,
       selected: node.id === selectedNodeId,
@@ -66,7 +80,43 @@ export function NodeCanvas({ json, onNodeSelect, selectedNodeId }: NodeCanvasPro
     
     setNodes(flowNodes)
     setEdges(flowEdges)
-  }, [layoutedNodes, graphData.edges, selectedNodeId])
+  }, [layoutedNodes, graphData.edges, selectedNodeId, hasSearch, filteredNodeIds])
+  
+  // Auto-center canvas on selected node when it changes (without changing zoom)
+  useEffect(() => {
+    console.log('[NodeCanvas] selectedNodeId:', selectedNodeId, 'Previous:', previousSelectedNodeId.current)
+    
+    if (!selectedNodeId) return
+    if (selectedNodeId === previousSelectedNodeId.current) return
+    
+    // Wait for nodes to be ready
+    const timer = setTimeout(() => {
+      console.log('[NodeCanvas] Looking for node in', existingNodes.length, 'nodes')
+      
+      const node = existingNodes.find(n => n.id === selectedNodeId)
+      console.log('[NodeCanvas] Found node?', node ? node.id : 'NO')
+      
+      if (!node) return
+      
+      // Get current zoom level
+      const currentZoom = getZoom()
+      
+      // Calculate center position for the node
+      const nodeCenterX = node.position.x + (node.width || 200) / 2
+      const nodeCenterY = node.position.y + (node.height || 60) / 2
+      
+      // Center on node while maintaining current zoom
+      setCenter(nodeCenterX, nodeCenterY, { 
+        zoom: currentZoom,
+        duration: 200
+      })
+      
+      console.log('[NodeCanvas] Centered on:', selectedNodeId)
+      previousSelectedNodeId.current = selectedNodeId
+    }, 100)
+    
+    return () => clearTimeout(timer)
+  }, [selectedNodeId, existingNodes, setCenter, getZoom])
   
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: any) => {
@@ -90,8 +140,7 @@ export function NodeCanvas({ json, onNodeSelect, selectedNodeId }: NodeCanvasPro
         onNodeClick={onNodeClick}
         onPaneClick={onPaneClick}
         nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        fitView
+        defaultEdgeOptions={defaultEdgeOptions}
         attributionPosition="bottom-left"
       >
         <Controls />
@@ -105,3 +154,13 @@ export function NodeCanvas({ json, onNodeSelect, selectedNodeId }: NodeCanvasPro
     </div>
   )
 }
+
+export function NodeCanvas(props: NodeCanvasProps) {
+  return (
+    <ReactFlowProvider>
+      <NodeCanvasContent {...props} />
+    </ReactFlowProvider>
+  )
+}
+
+export default NodeCanvas

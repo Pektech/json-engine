@@ -8,31 +8,58 @@ JSON.engine is a standalone visual JSON editor designed specifically for OpenCla
 
 OpenClaw administrators can safely edit complex JSON configurations with immediate visual feedback and validation, reducing errors before they reach production.
 
+## Current Status
+
+**Phase 4 COMPLETE — All gaps closed, UAT 11/11 passing ✅**
+
+- ✅ Phase 1: Foundation (2026-03-22)
+- ✅ Phase 2: Core Features (2026-03-22)
+- ✅ Phase 3: Validation & Search (2026-03-22)
+- ✅ Phase 4: Polish & Release (2026-03-28)
+
+**Verified Working:**
+- Visual node canvas with zoom/pan
+- Monaco Editor with bidirectional sync
+- AJV schema validation with error display
+- Canvas search + Monaco find widget
+- Keyboard shortcuts (Ctrl+O, Ctrl+S, F1, etc.)
+- Sidebar navigation (Editor/Canvas/Split/Settings views)
+- Node selection with scroll/highlight
+- File save with .json extension
+- Node position persistence
+
+**Ready for:** Beta release
+
 ## Requirements
 
 ### Validated
 
-(None yet — ship to validate)
+All core requirements validated via UAT (11/11 tests passing):
+
+- ✅ R-CANV-01: Visual node canvas renders JSON as interactive graph
+- ✅ R-EDIT-01: Monaco code editor with syntax highlighting
+- ✅ R-SYNC-01: Bidirectional sync between canvas and editor
+- ✅ R-VALD-01: JSON validation with error highlighting
+- ✅ R-FILE-01: File open/save via File System Access API
+- ✅ R-SRCH-01: Canvas search/filter functionality
+- ✅ R-PERS-01: Node position persistence
+- ✅ R-UIUX-01: Dark theme UI matching design system
+- ✅ R-UIUX-02: Keyboard shortcuts with preventDefault
+- ✅ R-NAV-01: Sidebar navigation with view switching
+- ✅ R-SEL-01: Node selection with editor scroll
 
 ### Active
 
-- [ ] Visual node canvas renders JSON as interactive graph
-- [ ] Monaco code editor with syntax highlighting and error detection
-- [ ] Bidirectional sync between canvas selection and editor position
-- [ ] JSON schema validation with error highlighting
-- [ ] File open/save via File System Access API
-- [ ] Canvas search/filter for navigating large configs
-- [ ] Node position persistence across sessions
-- [ ] Dark theme UI matching OpenClaw design system
+(None — all MVP requirements validated)
 
 ### Out of Scope
 
-- Multi-file project workspaces — MVP focuses on single file editing, file tree deferred to Phase 2
-- Direct OpenClaw gateway config push — requires gateway API endpoints that don't exist yet
-- Git integration — version control deferred to Phase 4
-- Real-time collaboration — complex feature for v2+
-- Mobile support — desktop-first for technical admin use case
-- Undo/redo history — local undo only in MVP, full history in Phase 2
+- Multi-file project workspaces — Phase 2
+- Direct OpenClaw gateway config push — requires gateway API (not yet available)
+- Git integration — Phase 4 (future)
+- Real-time collaboration — v2+
+- Mobile support — desktop-only
+- Undo/redo history — local undo only in MVP
 - Export as YAML/JS — JSON-only in MVP
 
 ## Context
@@ -48,7 +75,7 @@ OpenClaw administrators can safely edit complex JSON configurations with immedia
 ## Constraints
 
 - **Tech Stack:** Next.js 14, React 18, TypeScript — specified in architecture, non-negotiable
-- **Bundle Size:** Initial <300KB, Monaco <1MB, total first load <2MB — performance budget
+- **Bundle Size:** Initial <300KB, Monaco <1MB, total first load <2MB — performance budget (current: 5.79 MiB, optimization pending)
 - **Timeline:** 12 weeks (4 sprints) — defined in SPEC.md
 - **Dependencies:** Gateway API may not be available — use bundled schema fallback
 - **Browser Support:** Modern browsers with ES2020+, File System Access API with fallback
@@ -58,11 +85,14 @@ OpenClaw administrators can safely edit complex JSON configurations with immedia
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Monaco Editor over CodeMirror | VS Code familiarity, superior JSON support | — Pending |
-| React Flow for canvas | Battle-tested, handles zoom/pan/connections | — Pending |
-| Zustand over Redux | Lightweight, sufficient for this scale | — Pending |
-| MVP Track B (standalone) | Gateway API doesn't exist yet | — Pending |
-| .json-engine.json for positions | Simple, non-intrusive persistence | — Pending |
+| Monaco Editor over CodeMirror | VS Code familiarity, superior JSON support | ✅ Validated — working |
+| React Flow for canvas | Battle-tested, handles zoom/pan/connections | ✅ Validated — working |
+| Zustand over Redux | Lightweight, sufficient for this scale | ✅ Validated — used for app-store + viewStore |
+| MVP Track B (standalone) | Gateway API doesn't exist yet | ✅ Validated — working without gateway |
+| .json-engine.json for positions | Simple, non-intrusive persistence | ✅ Validated — working |
+| Capture-phase F1 listener | Only way to prevent browser help | ✅ Implemented in gap-06 |
+| Conditional preventDefault | Preserve Monaco shortcuts when editor focused | ✅ Implemented in gap-04 |
+| Default to 'split' view | Best first-time user experience | ✅ Implemented in gap-02 |
 
 ## Evolution
 

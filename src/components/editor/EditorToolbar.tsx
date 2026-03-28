@@ -1,6 +1,7 @@
 interface EditorToolbarProps {
   onFormat?: () => void
   onSearch?: () => void
+  onOpen?: () => void
   errorCount?: number
   warningCount?: number
   currentPath?: string | null
@@ -9,6 +10,7 @@ interface EditorToolbarProps {
 export function EditorToolbar({
   onFormat,
   onSearch,
+  onOpen,
   errorCount = 0,
   warningCount = 0,
   currentPath,
@@ -21,6 +23,17 @@ export function EditorToolbar({
   return (
     <div className="flex items-center justify-between px-4 py-2 h-12 bg-surface-container-low border-b border-outline-variant/10">
       <div className="flex items-center gap-2">
+        <button
+          onClick={onOpen}
+          className="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-surface-container-high transition-colors"
+          aria-label="Open File (Ctrl+O)"
+          title="Open File (Ctrl+O)"
+        >
+          <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
+          </svg>
+          <span className="font-label text-xs uppercase tracking-wider text-zinc-300">Open</span>
+        </button>
         <button
           onClick={onFormat}
           className="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-surface-container-high transition-colors"
@@ -69,13 +82,13 @@ export function EditorToolbar({
         <button
           onClick={onSearch}
           className="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-surface-container-high transition-colors"
-          aria-label="Search (Ctrl+F)"
-          title="Search (Ctrl+F)"
+          aria-label="Find in JSON (Ctrl+F)"
+          title="Find in JSON Text (Ctrl+F)"
         >
           <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <span className="font-label text-xs uppercase tracking-wider text-zinc-300 hidden sm:inline">Search</span>
+          <span className="font-label text-xs uppercase tracking-wider text-zinc-300 hidden sm:inline">Find in JSON</span>
         </button>
       </div>
     </div>

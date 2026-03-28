@@ -1,18 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useViewStore } from '@/stores/viewStore'
 
 interface NavItemProps {
   icon: React.ReactNode
   label: string
+  view: 'editor' | 'canvas' | 'split' | 'settings'
   active?: boolean
   onClick?: () => void
 }
 
-function NavItem({ icon, label, active, onClick }: NavItemProps) {
+function NavItem({ icon, label, view, active, onClick }: NavItemProps) {
+  const { setActiveView } = useViewStore()
+  
+  const handleClick = () => {
+    setActiveView(view)
+    onClick?.()
+  }
+  
   return (
     <div 
-      onClick={onClick}
+      onClick={handleClick}
       className={`
         px-4 py-3 flex items-center gap-3 cursor-pointer transition-colors
         ${active 
@@ -28,7 +36,7 @@ function NavItem({ icon, label, active, onClick }: NavItemProps) {
 }
 
 export function SideNavBar() {
-  const [activeItem, setActiveItem] = useState('explorer')
+  const { activeView } = useViewStore()
 
   return (
     <aside className="flex flex-col h-screen fixed left-0 top-0 pt-12 z-40 bg-surface-container-lowest w-64">
@@ -53,25 +61,25 @@ export function SideNavBar() {
           icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
           </svg>}
-          label="Explorer"
-          active={activeItem === 'explorer'}
-          onClick={() => setActiveItem('explorer')}
+          label="Editor"
+          view="editor"
+          active={activeView === 'editor'}
         />
         <NavItem 
           icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
           </svg>}
-          label="Graph_Nodes"
-          active={activeItem === 'graph'}
-          onClick={() => setActiveItem('graph')}
+          label="Canvas"
+          view="canvas"
+          active={activeView === 'canvas'}
         />
         <NavItem 
           icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>}
-          label="Debugger"
-          active={activeItem === 'debugger'}
-          onClick={() => setActiveItem('debugger')}
+          label="Split View"
+          view="split"
+          active={activeView === 'split'}
         />
         <NavItem 
           icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,8 +87,8 @@ export function SideNavBar() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>}
           label="Settings"
-          active={activeItem === 'settings'}
-          onClick={() => setActiveItem('settings')}
+          view="settings"
+          active={activeView === 'settings'}
         />
       </nav>
       

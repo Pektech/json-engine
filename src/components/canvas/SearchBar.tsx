@@ -37,12 +37,15 @@ export function SearchBar({ query, onSearch, matchCount = 0, totalCount = 0 }: S
       </svg>
       
       <input
+        ref={(el) => {
+          if (el) (el as any).dataset.workspaceSearch = 'true'
+        }}
         type="text"
         value={localQuery}
         onChange={handleChange}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        placeholder="Search nodes..."
+        placeholder="Search graph... (Ctrl+F)"
         className="flex-1 bg-transparent border-none outline-none text-sm text-on-surface placeholder-zinc-600 min-w-0"
       />
       

@@ -1,11 +1,11 @@
-import Ajv from 'ajv'
+import Ajv, { type ValidateFunction } from 'ajv'
 import addErrors from 'ajv-errors'
 import addFormats from 'ajv-formats'
 import type { ValidationError } from '@/types/validation'
 
 class ValidationService {
-  private ajv: Ajv
-  private validateFn: Ajv.ValidateFunction | null = null
+  private ajv: InstanceType<typeof Ajv>
+  private validateFn: ValidateFunction | null = null
 
   constructor() {
     this.ajv = new Ajv({

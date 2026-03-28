@@ -1,4 +1,4 @@
-import type { FileHandle, OpenFileResult, RecentFile, FileManagerError } '@/types/file-system'
+import type { FileHandle, OpenFileResult, RecentFile, FileManagerError } from '@/types/file-system'
 
 const RECENT_FILES_KEY = 'json-engine-recent-files'
 const MAX_RECENT_FILES = 10
@@ -51,7 +51,8 @@ export class FileManager {
 
   private async openFileWithAPI(): Promise<OpenFileResult | FileManagerError> {
     try {
-      const [fileHandle] = await window.showOpenFilePicker({
+      // Type assertion for File System Access API (not in standard TypeScript types)
+      const [fileHandle] = await (window as any).showOpenFilePicker({
         types: [{
           description: 'JSON files',
           accept: { 'application/json': ['.json'] }
@@ -157,11 +158,13 @@ export class FileManager {
 
   private saveFileWithFallback(filename: string, content: string): true | FileManagerError {
     try {
+      // ENSURE .json EXTENSION - prevents browser/OS misidentifying as HTML
+      const finalFilename = filename.endsWith('.json') ? filename : `${filename}.json`
       const blob = new Blob([content], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = filename
+      a.download = finalFilename
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)

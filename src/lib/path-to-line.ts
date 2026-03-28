@@ -11,40 +11,76 @@ function getLinePosition(text: string, index: number): LineLocation {
   }
 }
 
+function findLocationInText(jsonText: string, path: string): LineLocation {
+  if (path === 'root') {
+    return { line: 1, column: 1 }
+  }
+  
+  const lastPart = path.split(/[.\[\]]/).filter(Boolean).pop()
+  
+  if (!lastPart) {
+    return { line: 1, column: 1 }
+  }
+  
+  const isArrayIndex = /^\d+$/.test(lastPart)
+  
+  if (isArrayIndex) {
+    const arrayPattern = new RegExp(`\\[${lastPart}\\]\\s*:`)
+    const match = jsonText.match(arrayPattern)
+    if (match && match.index !== undefined) {
+      return getLinePosition(jsonText, match.index)
+    }
+  } else {
+    const objectPattern = new RegExp(`"${lastPart}"\\s*:`, 'm')
+    const match = jsonText.match(objectPattern)
+    if (match && match.index !== undefined) {
+      return getLinePosition(jsonText, match.index)
+    }
+  }
+  
+  return { line: 1, column: 1 }
+}
+
 export function parseJsonWithLocation(jsonText: string): { 
   data: any
   locations: Map<string, LineLocation>
 } {
   const locations = new Map<string, LineLocation>()
-  let pathStack: (string | number)[] = ['root']
   
   try {
     const data = JSON.parse(jsonText)
+    console.log('[parseJsonWithLocation] Parsed successfully, data type:', typeof data)
     
-    function traverse(obj: any, currentPath: string, currentLine: number = 1): void {
+    const traverse = (obj: any, currentPath: string): void => {
+      console.log('[traverse] At path:', currentPath, 'type:', typeof obj, 'isArray:', Array.isArray(obj), 'keys:', Object.keys(obj || {}).length)
+      
+      const location = findLocationInText(jsonText, currentPath)
+      locations.set(currentPath, location)
+      
       if (obj === null || typeof obj !== 'object') {
-        locations.set(currentPath, { line: currentLine, column: 1 })
+        console.log('[traverse] Primitive, stopping')
         return
       }
       
-      locations.set(currentPath, { line: currentLine, column: 1 })
-      
       if (Array.isArray(obj)) {
+        console.log('[traverse] Array with', obj.length, 'items')
         obj.forEach((item, index) => {
-          traverse(item, `${currentPath}[${index}]`, currentLine + index + 1)
+          traverse(item, `${currentPath}[${index}]`)
         })
       } else {
-        Object.entries(obj).forEach(([key, value], index) => {
-          const childPath = `${currentPath}.${key}`
-          const lineOffset = index + 1
-          traverse(value, childPath, currentLine + lineOffset)
+        const entries = Object.entries(obj)
+        console.log('[traverse] Object with', entries.length, 'entries:', entries.map(([k]) => k))
+        entries.forEach(([key]) => {
+          traverse(obj[key as keyof typeof obj], `${currentPath}.${key}`)
         })
       }
     }
     
     traverse(data, 'root')
+    console.log('[parseJsonWithLocation] Found', locations.size, 'locations')
     return { data, locations }
-  } catch {
+  } catch (e) {
+    console.error('[parseJsonWithLocation] Parse error:', e)
     return { data: null, locations }
   }
 }
@@ -57,16 +93,73 @@ export function pathToLine(jsonText: string, path: string): LineLocation | null 
 export function lineToPath(jsonText: string, line: number): string | null {
   const { locations } = parseJsonWithLocation(jsonText)
   
-  let closestPath: string | null = null
-  let closestLineDiff = Infinity
+  let bestPath: string | null = null
+  let bestScore = -1
   
   locations.forEach((location, path) => {
-    const lineDiff = Math.abs(location.line - line)
-    if (lineDiff < closestLineDiff) {
-      closestLineDiff = lineDiff
-      closestPath = path
+    // Only consider paths that are AT or BEFORE this line (not after)
+    if (location.line > line) return
+    
+    // Score based on:
+    // 1. How close the line is (closer = better)
+    // 2. Path depth (deeper = more specific = better)
+    const lineDiff = line - location.line
+    const depth = path.split(/[.\[\]]/).filter(Boolean).length
+    
+    // Score: prioritize closeness, but give bonus for depth
+    // A path that's 5 lines away but deeper might be better than root at 2 lines
+    const score = 1000 - lineDiff * 10 + depth * 50
+    
+    if (score > bestScore) {
+      bestScore = score
+      bestPath = path
     }
   })
   
-  return closestPath
+  return bestPath
+}
+
+/**
+ * Find the full path to a node by its key label and approximate line number.
+ * This is more accurate than line-based matching because it matches the actual key name.
+ */
+export function findPathByKeyLabel(jsonText: string, keyLabel: string, approximateLine: number): string | null {
+  const { locations } = parseJsonWithLocation(jsonText)
+  
+  console.log('[findPathByKeyLabel] Input:', { keyLabel, approximateLine, totalLocations: locations.size })
+  
+  let bestMatch: { path: string; line: number; score: number } | null = null
+  
+  locations.forEach((location, path) => {
+    // Extract the key label from this path
+    const pathParts = path.split(/[.\[\]]/).filter(Boolean)
+    const lastPart = pathParts[pathParts.length - 1]
+    
+    // Check if this path's key matches our search (remove quotes if present)
+    const cleanLastPart = lastPart.replace(/^"|"$/g, '')
+    const cleanKeyLabel = keyLabel.replace(/^"|"$/g, '')
+    
+    console.log('[findPathByKeyLabel] Checking:', path, 'lastPart:', cleanLastPart, 'vs', cleanKeyLabel, 'match:', cleanLastPart === cleanKeyLabel)
+    
+    if (cleanLastPart === cleanKeyLabel) {
+      // Calculate how close this is to our target line
+      const lineDiff = Math.abs(location.line - approximateLine)
+      
+      // Score: prefer closer lines
+      const score = 1000 - lineDiff * 10
+      
+      console.log('[findPathByKeyLabel] Match found! Line:', location.line, 'Diff:', lineDiff, 'Score:', score)
+      
+      if (!bestMatch || score > bestMatch.score) {
+        bestMatch = {
+          path,
+          line: location.line,
+          score
+        }
+      }
+    }
+  })
+  
+  console.log('[findPathByKeyLabel] Result:', bestMatch?.path)
+  return bestMatch?.path || null
 }
