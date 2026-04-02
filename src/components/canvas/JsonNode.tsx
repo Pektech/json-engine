@@ -10,8 +10,11 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
   const { type, label, value, path } = jsonNodeData
   const [isExpanded, setIsExpanded] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
+  const [isEditingKey, setIsEditingKey] = useState(false)
   const [editValue, setEditValue] = useState(String(value || ''))
+  const [editKeyValue, setEditKeyValue] = useState(label)
   const inputRef = useRef<HTMLInputElement>(null)
+  const keyInputRef = useRef<HTMLInputElement>(null)
   const validationErrors = useAppStore(state => state.validationErrors)
   
   const isSelected = data.isSelected ?? selected
@@ -28,6 +31,50 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
       inputRef.current.select()
     }
   }, [isEditing])
+  
+  useEffect(() => {
+    if (isEditingKey && keyInputRef.current) {
+      keyInputRef.current.focus()
+      keyInputRef.current.select()
+    }
+  }, [isEditingKey])
+  
+  const startKeyEdit = () => {
+    // Can't edit root node's name
+    if (path === 'root' || !path) return
+    setIsEditingKey(true)
+    setEditKeyValue(label)
+  }
+  
+  const saveKeyEdit = () => {
+    if (!path || !editKeyValue.trim()) {
+      cancelKeyEdit()
+      return
+    }
+    
+    const { parsedJson, setJsonText } = useAppStore.getState()
+    
+    // Rename the key in the JSON
+    const updatedJson = renameKeyAtPath(parsedJson, path, editKeyValue.trim())
+    
+    console.log('[JsonNode] Renamed key to:', editKeyValue, 'New JSON length:', JSON.stringify(updatedJson, null, 2).length)
+    
+    setJsonText(JSON.stringify(updatedJson, null, 2))
+    setIsEditingKey(false)
+  }
+  
+  const cancelKeyEdit = () => {
+    setEditKeyValue(label)
+    setIsEditingKey(false)
+  }
+  
+  const handleKeyKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      saveKeyEdit()
+    } else if (e.key === 'Escape') {
+      cancelKeyEdit()
+    }
+  }
   
   const handleDoubleClick = () => {
     // Only allow editing of primitive values (not objects/arrays)
@@ -122,9 +169,34 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
       
       <div className="px-3 py-2">
         <div className="flex items-center gap-2 mb-1.5">
-          <span className="font-mono text-sm text-secondary font-medium truncate" title={label}>
-            {label}
-          </span>
+          {isEditingKey ? (
+            <input
+              ref={keyInputRef}
+              type="text"
+              value={editKeyValue}
+              onChange={(e) => setEditKeyValue(e.target.value)}
+              onBlur={saveKeyEdit}
+              onKeyDown={handleKeyKeyDown}
+              className="
+                w-32 px-1 py-0.5 text-sm font-mono rounded border-2
+                bg-surface-container-lowest outline-none
+                border-primary focus:border-accent text-secondary
+              "
+              onClick={(e) => e.stopPropagation()}
+              onDoubleClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <span 
+              className="font-mono text-sm text-secondary font-medium truncate" 
+              title={label}
+              onDoubleClick={(e) => {
+                e.stopPropagation()
+                startKeyEdit()
+              }}
+            >
+              {label}
+            </span>
+          )}
           {isExpandable && (
             <span className="text-[10px] text-zinc-500">
               {isExpanded ? '◢' : '◣'}
@@ -223,6 +295,95 @@ function setValueAtPath(obj: any, path: string, value: any): any {
   current[lastKey] = value
   
   console.log('[setValueAtPath] Success! New value:', current[lastKey])
+  
+  return result
+}
+
+// Helper function to rename a key at a specific path
+function renameKeyAtPath(obj: any, fullPath: string, newKey: string): any {
+  const result = JSON.parse(JSON.stringify(obj))
+  
+  // Parse the path into keys
+  const keys = fullPath.split(/[.\[\]]/).filter(Boolean)
+  
+  // Skip 'root' and get the actual keys
+  const actualKeys = keys.filter(k => k !== 'root')
+  
+  if (actualKeys.length === 0) {
+    console.error('Cannot rename root')
+    return obj
+  }
+  
+  console.log('[renameKeyAtPath] Renaming', fullPath, '→', newKey)
+  
+  // Navigate to the parent object
+  let parent = result
+  for (let i = 0; i < actualKeys.length - 1; i++) {
+    const key = actualKeys[i]
+    if (parent[key] === undefined) {
+      console.error('Parent path not found:', actualKeys.slice(0, i + 1).join('.'))
+      return obj
+    }
+    parent = parent[key]
+  }
+  
+  // Get the old key name (the last part of the path)
+  const oldKey = actualKeys[actualKeys.length - 1]
+  
+  // Check if new key already exists in parent
+  if (parent.hasOwnProperty(newKey)) {
+    console.error('Key already exists:', newKey)
+    return obj
+  }
+  
+  // Rename the key while preserving order
+  const entries = Object.entries(parent)
+  const newParent: any = {}
+  
+  entries.forEach(([key, value]) => {
+    if (key === oldKey) {
+      newParent[newKey] = value
+    } else {
+      newParent[key] = value
+    }
+  })
+  
+  // Replace parent in its parent
+  const grandparentKeys = actualKeys.slice(0, actualKeys.length - 2)
+  if (grandparentKeys.length === 0) {
+    // Parent is a direct child of root
+    const parentKey = actualKeys[actualKeys.length - 2] || actualKeys[0]
+    if (grandparentKeys.length === 0 && actualKeys.length === 1) {
+      // Renaming a top-level key
+      return newParent
+    }
+    // Need to rebuild from root
+    return rebuildWithNewParent(result, actualKeys.slice(0, -1), newParent)
+  }
+  
+  // For deeply nested, rebuild the path
+  return rebuildWithNewParent(result, actualKeys.slice(0, -1), newParent)
+}
+
+// Helper to rebuild an object with a new parent at a specific path
+function rebuildWithNewParent(obj: any, pathKeys: string[], newParent: any): any {
+  if (pathKeys.length === 0) {
+    return newParent
+  }
+  
+  const result = JSON.parse(JSON.stringify(obj))
+  let current = result
+  
+  for (let i = 0; i < pathKeys.length - 1; i++) {
+    const key = pathKeys[i]
+    if (current[key] === undefined) {
+      return obj
+    }
+    current = current[key]
+  }
+  
+  const lastKey = pathKeys[pathKeys.length - 1]
+  current[lastKey] = newParent
   
   return result
 }
