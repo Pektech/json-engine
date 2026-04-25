@@ -4,15 +4,15 @@ import { KeyboardShortcutsHelp } from './KeyboardShortcutsHelp'
 
 interface TopAppBarProps {
   showHelp: boolean
-  currentPath?: string | null
   setShowHelp: (isOpen: boolean) => void
+  currentPath?: string | null
 }
 
 export function TopAppBar({ showHelp, setShowHelp, currentPath }: TopAppBarProps) {
 
   const formatPath = (path: string | null): string => {
     if (!path) return ''
-    return path.replace(/\\./g, ' › ').replace(/\[(d+)\]/g, '[$1]')
+    return path.replace(/\./g, ' › ').replace(/\[(\d+)\]/g, '[$1]')
   }
 
   return (
@@ -42,6 +42,15 @@ export function TopAppBar({ showHelp, setShowHelp, currentPath }: TopAppBarProps
               History
             </a>
           </nav>
+        </div>
+        <div className="flex items-center justify-center absolute left-1/2 -translate-x-1/2 max-w-md truncate">
+          {currentPath && currentPath !== 'root' && (
+            <div className="flex items-center gap-1 text-xs text-zinc-400 font-mono">
+              <span className="text-zinc-600">root</span>
+              <span className="text-zinc-600"> › </span>
+              <span className="text-primary">{formatPath(currentPath.replace('root.', ''))}</span>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-4">
           <div className="flex gap-2">
