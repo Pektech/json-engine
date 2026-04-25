@@ -4,7 +4,6 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import {
   ReactFlow,
   Controls,
-  MiniMap,
   Background,
   useReactFlow,
   ReactFlowProvider,
