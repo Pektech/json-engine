@@ -334,7 +334,7 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
           isEditing ? (
             <input
               ref={inputRef}
-              type={type === 'number' ? 'number' : 'text'}
+              type="text"
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
               onBlur={saveEdit}
