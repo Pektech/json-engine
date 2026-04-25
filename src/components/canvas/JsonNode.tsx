@@ -159,9 +159,9 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
     const updatedJson = deleteNodeAtPath(parsedJson, path)
     setJsonText(JSON.stringify(updatedJson, null, 2))
     
-    // Select parent after deletion
+    // Select parent after deletion (defer to let canvas re-render)
     if (parentPath) {
-      selectPath(parentPath)
+      setTimeout(() => selectPath(parentPath), 100)
     }
   }
   
