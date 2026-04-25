@@ -5,7 +5,7 @@ import { Handle, Position } from '@xyflow/react'
 import { useAppStore } from '@/store/app-store'
 import type { JsonNodeData } from '@/types/canvas'
 import { ContextMenu, type ContextMenuItem } from './ContextMenu'
-import { setValueAtPath, renameKeyAtPath, addChildAtPath, addArrayItem, deleteNodeAtPath } from '@/lib/json-mutations'
+import { getValueAtPath, insertNodeAtPath, setValueAtPath, renameKeyAtPath, addChildAtPath, addArrayItem, deleteNodeAtPath } from '@/lib/json-mutations'
 
 export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boolean }) {
   const jsonNodeData = data as unknown as JsonNodeData
@@ -14,6 +14,7 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
   const [isEditing, setIsEditing] = useState(false)
   const [isEditingKey, setIsEditingKey] = useState(false)
   const [editValue, setEditValue] = useState(String(value || ''))
+  const [hasClipboard, setHasClipboard] = useState(false)
   const [editKeyValue, setEditKeyValue] = useState(label)
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -34,6 +35,17 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
       inputRef.current.select()
     }
   }, [isEditing])
+
+  // Clipboard state listener
+  useEffect(() => {
+    const checkClipboard = () => {
+      setHasClipboard(!!sessionStorage.getItem('json-engine-clipboard'))
+    }
+    checkClipboard()
+    
+    window.addEventListener('clipboard-changed', checkClipboard)
+    return () => window.removeEventListener('clipboard-changed', checkClipboard)
+  }, [])
   
   // Listen for auto-edit events (when new items are added)
   useEffect(() => {
@@ -162,6 +174,30 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
     // Select parent after deletion (defer to let canvas re-render)
     if (parentPath) {
       setTimeout(() => selectPath(parentPath), 100)
+    }
+  }
+
+  const handleCopy = () => {
+    const { parsedJson } = useAppStore.getState()
+    const value = getValueAtPath(parsedJson, path)
+    const clipboardData = { path, value, type, timestamp: Date.now() }
+    sessionStorage.setItem('json-engine-clipboard', JSON.stringify(clipboardData))
+    window.dispatchEvent(new CustomEvent('clipboard-changed'))
+  }
+
+  const handlePaste = () => {
+    const clipboardStr = sessionStorage.getItem('json-engine-clipboard')
+    if (!clipboardStr) return
+    
+    const { parsedJson, setJsonText, selectPath } = useAppStore.getState()
+    try {
+      const clipboardData = JSON.parse(clipboardStr)
+      const keyName = 'pasted_' + Date.now()
+      const updatedJson = insertNodeAtPath(parsedJson, path, keyName, clipboardData.value)
+      setJsonText(JSON.stringify(updatedJson, null, 2))
+      selectPath(`${path}.${keyName}`)
+    } catch (e) {
+      console.error('Paste failed:', e)
     }
   }
   

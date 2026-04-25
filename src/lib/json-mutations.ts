@@ -202,3 +202,65 @@ export function deleteNodeAtPath(obj: unknown, path: string): unknown {
 
   return result
 }
+
+export function getValueAtPath(obj: unknown, path: string): unknown {
+  if (!path || path === 'root') return obj
+  
+  const keys = parsePath(path)
+  
+  let current = obj as Record<string, unknown>
+  for (const key of keys) {
+    if (current === undefined || current === null) return undefined
+    current = current[key] as Record<string, unknown>
+  }
+  
+  return current
+}
+
+export function insertNodeAtPath(
+  obj: unknown,
+  parentPath: string,
+  key: string,
+  value: unknown
+): unknown {
+  if (parentPath === 'root') {
+    // Adding to root level
+    if (typeof obj === 'object' && obj !== null && !Array.isArray(obj)) {
+      return { ...(obj as Record<string, unknown>), [key]: value }
+    }
+    return obj
+  }
+  
+  // Navigate to parent
+  const parent = getValueAtPath(obj, parentPath)
+  
+  if (Array.isArray(parent)) {
+    // For arrays, push to end (ignore key, use as array item)
+    const result = clone(obj)
+    const keys = parsePath(parentPath)
+    let current = result as Record<string, unknown>
+    for (let i = 0; i < keys.length - 1; i++) {
+      current = current[keys[i]] as Record<string, unknown>
+    }
+    const lastKey = keys[keys.length - 1]
+    const arr = current[lastKey] as unknown[]
+    arr.push(value)
+    return result
+  }
+  
+  if (parent && typeof parent === 'object' && !Array.isArray(parent)) {
+    // For objects, add as keyed child
+    const result = clone(obj)
+    const keys = parsePath(parentPath)
+    let current = result as Record<string, unknown>
+    for (let i = 0; i < keys.length - 1; i++) {
+      current = current[keys[i]] as Record<string, unknown>
+    }
+    const lastKey = keys[keys.length - 1]
+    const targetObj = current[lastKey] as Record<string, unknown>
+    targetObj[key] = value
+    return result
+  }
+  
+  return obj
+}
