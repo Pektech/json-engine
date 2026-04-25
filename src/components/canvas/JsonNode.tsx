@@ -230,6 +230,20 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
       })
     }
     
+    // Copy - always shown
+    items.push({ 
+      label: 'Copy', 
+      onClick: handleCopy 
+    })
+
+    // Paste - only shown when clipboard has data  
+    if (hasClipboard) {
+      items.push({ 
+        label: 'Paste', 
+        onClick: handlePaste 
+      })
+    }
+    
     if (path !== 'root') {
       items.push({ 
         label: 'Delete', 
