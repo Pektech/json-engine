@@ -13,6 +13,20 @@ const localStorageMock = {
 }
 Object.defineProperty(window, 'localStorage', { value: localStorageMock })
 
+// Mock Blob and URL for jsdom
+class MockBlob {
+  constructor(private parts: any[], private options?: { type?: string }) {}
+}
+Object.defineProperty(window, 'Blob', { value: MockBlob, writable: true })
+
+Object.defineProperty(window, 'URL', {
+  value: {
+    createObjectURL: jest.fn(() => 'blob:test'),
+    revokeObjectURL: jest.fn()
+  },
+  writable: true
+})
+
 // Mock File System Access API
 const mockFileHandle = {
   getFile: jest.fn(),
@@ -76,7 +90,7 @@ describe('FileManager', () => {
     })
 
     it('detects File System Access API support', () => {
-      expect(typeof window.showOpenFilePicker).toBe('function')
+      expect(typeof (window as any).showOpenFilePicker).toBe('function')
     })
   })
 
