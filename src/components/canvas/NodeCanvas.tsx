@@ -84,17 +84,14 @@ function NodeCanvasContent({ json, onNodeSelect, selectedNodeId, searchQuery = '
   
   // Auto-center canvas on selected node when it changes (without changing zoom)
   useEffect(() => {
-    console.log('[NodeCanvas] selectedNodeId:', selectedNodeId, 'Previous:', previousSelectedNodeId.current)
     
     if (!selectedNodeId) return
     if (selectedNodeId === previousSelectedNodeId.current) return
     
     // Wait for nodes to be ready
     const timer = setTimeout(() => {
-      console.log('[NodeCanvas] Looking for node in', existingNodes.length, 'nodes')
       
       const node = existingNodes.find(n => n.id === selectedNodeId)
-      console.log('[NodeCanvas] Found node?', node ? node.id : 'NO')
       
       if (!node) return
       
@@ -111,7 +108,6 @@ function NodeCanvasContent({ json, onNodeSelect, selectedNodeId, searchQuery = '
         duration: 200
       })
       
-      console.log('[NodeCanvas] Centered on:', selectedNodeId)
       previousSelectedNodeId.current = selectedNodeId
     }, 100)
     

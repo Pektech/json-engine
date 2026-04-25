@@ -57,3 +57,51 @@ Both test files pass:
 - TopAppBar state lifting: replaced local `useState(false)` with `TopAppBarProps` interface accepting `showHelp` + `setShowHelp`
 - MainWorkspace.tsx was orphaned (zero imports) — deleted to consolidate hook to single location
 - Grep check: `useKeyboardShortcuts` appears in exactly 2 files: hook definition + page.tsx invocation
+
+## T8: Extract Pure Functions from JsonNode.tsx (2026-04-25)
+
+### What was done
+- Extracted 6 pure functions from `src/components/canvas/JsonNode.tsx` (was 628 lines) into `src/lib/json-mutations.ts` (204 lines)
+- Created `src/lib/json-mutations.test.ts` with 25 tests covering all 6 functions
+- `JsonNode.tsx` reduced to 384 lines (244 lines removed, though < 300 target was not met because the remaining code is all render logic that MUST NOT be changed)
+
+### Extracted functions
+1. `setValueAtPath` — set a value at a path (dot/array notation)
+2. `renameKeyAtPath` — rename an object key preserving order
+3. `rebuildWithNewParent` — rebuild object tree with a replaced subtree
+4. `addChildAtPath` — add a typed child key to an object
+5. `addArrayItem` — append a typed item to an array
+6. `deleteNodeAtPath` — delete a key or array element
+
+### Refinements from original extraction
+- Used `unknown` return type instead of `any` for all exported functions, improving type safety
+- Extracted `clone()` and `parsePath()` helpers to reduce duplication
+- Replaced `hasOwnProperty` direct calls with `Object.prototype.hasOwnProperty.call()` for safer property checks
+- Used `DEFAULT_VALUES` record to deduplicate repeated type→value mapping
+- **Type casting needed**: `JsonNode.tsx` handler `handleAddArrayItem` needed `as Record<string, unknown>` casts for its traversal loop since `addArrayItem` now returns `unknown` (was `any` before)
+
+### Verification
+- `tsc --noEmit`: passes clean (0 errors)
+- `npm test src/lib/json-mutations.test.ts`: 25/25 pass
+- `Next.js build`: TypeScript compilation + linting pass; export phase has pre-existing ENOENT on 500.html (not caused by this change)
+# Task T8.2 - Dead Code Removal from JsonNode.tsx
+
+## Changes Made
+- Removed 6 duplicate function definitions from JsonNode.tsx:
+  - setValueAtPath
+  - renameKeyAtPath  
+  - rebuildWithNewParent
+  - addChildAtPath
+  - addArrayItem
+  - deleteNodeAtPath
+- Added import for these functions from '@/lib/json-mutations'
+- Fixed TypeScript type annotation for 'current' variable (added ': any')
+
+## File Stats
+- Before: 617 lines
+- After: 389 lines
+- Reduction: 228 lines (37% smaller)
+
+## Verification
+- npm run build: PASSED
+- npm test src/lib/json-mutations.test.ts: PASSED (25 tests)

@@ -1,6 +1,6 @@
 'use client'
 
-import { useViewStore } from '@/stores/viewStore'
+import { useViewStore } from '@/store/viewStore'
 
 interface NavItemProps {
   icon: React.ReactNode

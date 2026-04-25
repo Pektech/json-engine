@@ -426,7 +426,7 @@ Max Concurrent: 4 (Waves 4+5)
 
   **Commit**: NO — grouped with T3 (Wave 2)
 
-- [ ] 5. Remove dead reactflow dependency + npm install
+- [x] 5. Remove dead reactflow dependency + npm install
 
   **What to do**:
   - [ ] Remove `"reactflow": "^11.11.4"` from `package.json` (code uses only `@xyflow/react`)
@@ -710,7 +710,7 @@ Max Concurrent: 4 (Waves 4+5)
 
   **Commit**: NO (grouped with Wave 3)
   
-- [ ] 9. Remove all console.log/warn/info/debug calls (preserve console.error)
+- [x] 9. Remove all console.log/warn/info/debug calls (preserve console.error)
 
   **What to do**:
   - [ ] Search all `src/` files for `console\.(log|warn|info|debug)` calls (should be ~54 total)
@@ -767,7 +767,7 @@ Max Concurrent: 4 (Waves 4+5)
 
   **Commit**: NO (grouped with Wave 4)
 
-- [ ] 10. Consolidate stores/ into store/ directory
+- [x] 10. Consolidate stores/ into store/ directory
 
   **What to do**:
   - [ ] Read `src/stores/viewStore.ts` (13 lines) — understand its API
@@ -818,7 +818,7 @@ Max Concurrent: 4 (Waves 4+5)
 
   **Commit**: NO (grouped with Wave 4)
 
-- [ ] 11. Refactor JsonNode.tsx — extract 6 helpers to lib/json-mutations.ts
+- [x] 11. Refactor JsonNode.tsx — extract 6 helpers to lib/json-mutations.ts
 
   **What to do**:
   - [ ] In `src/components/canvas/JsonNode.tsx`, identify the 6 inline pure functions:

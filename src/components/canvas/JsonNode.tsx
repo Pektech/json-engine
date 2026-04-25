@@ -5,6 +5,7 @@ import { Handle, Position } from '@xyflow/react'
 import { useAppStore } from '@/store/app-store'
 import type { JsonNodeData } from '@/types/canvas'
 import { ContextMenu, type ContextMenuItem } from './ContextMenu'
+import { setValueAtPath, renameKeyAtPath, addChildAtPath, addArrayItem, deleteNodeAtPath } from '@/lib/json-mutations'
 
 export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boolean }) {
   const jsonNodeData = data as unknown as JsonNodeData
@@ -41,7 +42,6 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
       const nodeIsExpandable = type === 'object' || type === 'array'
       
       if (customEvent.detail.path === path && !nodeIsExpandable && value !== undefined) {
-        console.log('[JsonNode] Auto-opening edit for:', path)
         setIsEditing(true)
         setEditValue(String(value))
       }
@@ -76,7 +76,6 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
     // Rename the key in the JSON
     const updatedJson = renameKeyAtPath(parsedJson, path, editKeyValue.trim())
     
-    console.log('[JsonNode] Renamed key to:', editKeyValue, 'New JSON length:', JSON.stringify(updatedJson, null, 2).length)
     
     setJsonText(JSON.stringify(updatedJson, null, 2))
     setIsEditingKey(false)
@@ -98,7 +97,6 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    console.log('[JsonNode] Context menu triggered at:', e.clientX, e.clientY, 'for path:', path)
     setContextMenu({ x: e.clientX, y: e.clientY })
   }
   
@@ -126,7 +124,7 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
     
     // Get the new item's path
     const keys = path.split(/[.\[\]]/).filter(Boolean).filter(k => k !== 'root')
-    let current = updatedJson
+    let current: any = updatedJson
     for (const key of keys) {
       if (current[key] === undefined) return
       current = current[key]
@@ -206,7 +204,6 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
   }
   
   const saveEdit = () => {
-    console.log('[JsonNode] saveEdit called for path:', path, 'value:', editValue)
     
     if (!path) {
       console.error('[JsonNode] No path to save')
@@ -216,7 +213,6 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
     // Get current JSON and update function from store
     const { parsedJson, setJsonText } = useAppStore.getState()
     
-    console.log('[JsonNode] Current parsedJson keys:', Object.keys(parsedJson || {}).length)
     
     // Parse the new value based on type
     let newValue: any = editValue
@@ -231,17 +227,14 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
       newValue = editValue.toLowerCase() === 'true'
     }
     
-    console.log('[JsonNode] Setting path:', path, 'to:', newValue, 'type:', type)
     
     // Update the JSON at the specified path
     const updatedJson = setValueAtPath(parsedJson, path, newValue)
     
-    console.log('[JsonNode] Updated JSON, new string length:', JSON.stringify(updatedJson, null, 2).length)
     
     // Convert back to string and update editor
     setJsonText(JSON.stringify(updatedJson, null, 2))
     
-    console.log('[JsonNode] Save complete')
     setIsEditing(false)
   }
   
@@ -391,238 +384,6 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
     )}
   </>
   )
-}
-
-// Helper function to set a value at a specific path in a JSON object
-function setValueAtPath(obj: any, path: string, value: any): any {
-  // Deep clone to avoid mutating the original
-  const result = JSON.parse(JSON.stringify(obj))
-  
-  // Parse the path into keys (handles both dot notation and array indices)
-  const keys = path.split(/[.\[\]]/).filter(Boolean)
-  
-  // Skip 'root' as it's just our label for the top-level object
-  const actualKeys = keys.filter(k => k !== 'root')
-  
-  if (actualKeys.length === 0) {
-    return value
-  }
-  
-  console.log('[setValueAtPath] Setting', actualKeys.join('.'), 'to', value)
-  
-  // Navigate to the parent of the target
-  let current = result
-  for (let i = 0; i < actualKeys.length - 1; i++) {
-    const key = actualKeys[i]
-    if (current[key] === undefined) {
-      console.error('Path not found:', path, 'at key:', key, 'in', Object.keys(current))
-      return obj
-    }
-    current = current[key]
-  }
-  
-  // Set the value at the target key
-  const lastKey = actualKeys[actualKeys.length - 1]
-  current[lastKey] = value
-  
-  console.log('[setValueAtPath] Success! New value:', current[lastKey])
-  
-  return result
-}
-
-// Helper function to rename a key at a specific path
-function renameKeyAtPath(obj: any, fullPath: string, newKey: string): any {
-  const result = JSON.parse(JSON.stringify(obj))
-  
-  // Parse the path into keys
-  const keys = fullPath.split(/[.\[\]]/).filter(Boolean)
-  
-  // Skip 'root' and get the actual keys
-  const actualKeys = keys.filter(k => k !== 'root')
-  
-  if (actualKeys.length === 0) {
-    console.error('Cannot rename root')
-    return obj
-  }
-  
-  console.log('[renameKeyAtPath] Renaming', fullPath, '→', newKey)
-  
-  // Navigate to the parent object
-  let parent = result
-  for (let i = 0; i < actualKeys.length - 1; i++) {
-    const key = actualKeys[i]
-    if (parent[key] === undefined) {
-      console.error('Parent path not found:', actualKeys.slice(0, i + 1).join('.'))
-      return obj
-    }
-    parent = parent[key]
-  }
-  
-  // Get the old key name (the last part of the path)
-  const oldKey = actualKeys[actualKeys.length - 1]
-  
-  // Check if new key already exists in parent
-  if (parent.hasOwnProperty(newKey)) {
-    console.error('Key already exists:', newKey)
-    return obj
-  }
-  
-  // Rename the key while preserving order
-  const entries = Object.entries(parent)
-  const newParent: any = {}
-  
-  entries.forEach(([key, value]) => {
-    if (key === oldKey) {
-      newParent[newKey] = value
-    } else {
-      newParent[key] = value
-    }
-  })
-  
-  // Replace parent in its parent
-  const grandparentKeys = actualKeys.slice(0, actualKeys.length - 2)
-  if (grandparentKeys.length === 0) {
-    // Parent is a direct child of root
-    const parentKey = actualKeys[actualKeys.length - 2] || actualKeys[0]
-    if (grandparentKeys.length === 0 && actualKeys.length === 1) {
-      // Renaming a top-level key
-      return newParent
-    }
-    // Need to rebuild from root
-    return rebuildWithNewParent(result, actualKeys.slice(0, -1), newParent)
-  }
-  
-  // For deeply nested, rebuild the path
-  return rebuildWithNewParent(result, actualKeys.slice(0, -1), newParent)
-}
-
-// Helper to rebuild an object with a new parent at a specific path
-function rebuildWithNewParent(obj: any, pathKeys: string[], newParent: any): any {
-  if (pathKeys.length === 0) {
-    return newParent
-  }
-  
-  const result = JSON.parse(JSON.stringify(obj))
-  let current = result
-  
-  for (let i = 0; i < pathKeys.length - 1; i++) {
-    const key = pathKeys[i]
-    if (current[key] === undefined) {
-      return obj
-    }
-    current = current[key]
-  }
-  
-  const lastKey = pathKeys[pathKeys.length - 1]
-  current[lastKey] = newParent
-  
-  return result
-}
-
-// Add a child key to an object with specified type
-function addChildAtPath(obj: any, path: string, keyName: string, type: 'string' | 'number' | 'boolean' | 'object' | 'array' = 'string'): any {
-  const result = JSON.parse(JSON.stringify(obj))
-  const keys = path.split(/[.\[\]]/).filter(Boolean).filter(k => k !== 'root')
-  
-  // Navigate to the target object
-  let current = result
-  for (const key of keys) {
-    if (current[key] === undefined) {
-      console.error('Path not found:', path)
-      return obj
-    }
-    current = current[key]
-  }
-  
-  // Check if key already exists
-  if (current.hasOwnProperty(keyName)) {
-    alert(`Key "${keyName}" already exists!`)
-    return obj
-  }
-  
-  // Add new value based on type
-  const defaultValue = {
-    string: "",
-    number: 0,
-    boolean: false,
-    object: {},
-    array: []
-  }[type]
-  
-  current[keyName] = defaultValue
-  
-  return result
-}
-
-// Add an item to an array with specified type
-function addArrayItem(obj: any, path: string, type: 'string' | 'number' | 'boolean' | 'object' | 'array' = 'string'): any {
-  const result = JSON.parse(JSON.stringify(obj))
-  const keys = path.split(/[.\[\]]/).filter(Boolean).filter(k => k !== 'root')
-  
-  // Navigate to the target array
-  let current = result
-  for (const key of keys) {
-    if (current[key] === undefined) {
-      console.error('Path not found:', path)
-      return obj
-    }
-    current = current[key]
-  }
-  
-  if (!Array.isArray(current)) {
-    console.error('Not an array:', path)
-    return obj
-  }
-  
-  // Add value based on type
-  const defaultValue = {
-    string: "",
-    number: 0,
-    boolean: false,
-    object: {},
-    array: []
-  }[type]
-  
-  current.push(defaultValue)
-  
-  return result
-}
-
-// Delete a node at a path
-function deleteNodeAtPath(obj: any, path: string): any {
-  const result = JSON.parse(JSON.stringify(obj))
-  const keys = path.split(/[.\[\]]/).filter(Boolean).filter(k => k !== 'root')
-  
-  if (keys.length === 0) {
-    console.error('Cannot delete root')
-    return obj
-  }
-  
-  // Navigate to the parent
-  let parent = result
-  for (let i = 0; i < keys.length - 1; i++) {
-    const key = keys[i]
-    if (parent[key] === undefined) {
-      console.error('Parent not found:', keys.slice(0, i + 1).join('.'))
-      return obj
-    }
-    parent = parent[key]
-  }
-  
-  const lastKey = keys[keys.length - 1]
-  
-  // Handle array deletion
-  if (Array.isArray(parent)) {
-    const index = parseInt(lastKey, 10)
-    if (!isNaN(index)) {
-      parent.splice(index, 1)
-    }
-  } else {
-    // Handle object key deletion
-    delete parent[lastKey]
-  }
-  
-  return result
 }
 
 export default JsonNode

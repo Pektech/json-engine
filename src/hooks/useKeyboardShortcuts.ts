@@ -109,7 +109,6 @@ export function useKeyboardShortcuts() {
     // Only trigger if NOT in editor
     if (focusedArea !== 'editor') {
       event.preventDefault();
-      console.log('Replace functionality...');
     }
     // If in editor, let Monaco handle Ctrl+H natively
   }, { enableOnFormTags: true, enableOnContentEditable: true });

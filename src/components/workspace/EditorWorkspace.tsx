@@ -6,7 +6,7 @@ import { EditorToolbar } from '@/components/editor/EditorToolbar'
 import { ErrorPanel } from '@/components/panels/ErrorPanel'
 import { SearchBar } from '@/components/canvas/SearchBar'
 import { useAppStore } from '@/store/app-store'
-import { useViewStore } from '@/stores/viewStore'
+import { useViewStore } from '@/store/viewStore'
 import { CodeEditor, type CodeEditorHandle } from '@/components/editor/CodeEditor'
 import { NodeCanvas } from '@/components/canvas/NodeCanvas'
 import { CodeEditorLoader } from '@/components/editor/CodeEditorLoader'
@@ -85,10 +85,8 @@ export function EditorWorkspace() {
   }, []);
 
   const handleCursorPositionChange = useCallback((path: string | null) => {
-    console.log('[EditorWorkspace] Received path from editor:', path)
     if (path) {
       selectPath(path)
-      console.log('[EditorWorkspace] Called selectPath with:', path)
     }
   }, [selectPath])
 

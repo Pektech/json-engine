@@ -49,27 +49,22 @@ export function parseJsonWithLocation(jsonText: string): {
   
   try {
     const data = JSON.parse(jsonText)
-    console.log('[parseJsonWithLocation] Parsed successfully, data type:', typeof data)
     
     const traverse = (obj: any, currentPath: string): void => {
-      console.log('[traverse] At path:', currentPath, 'type:', typeof obj, 'isArray:', Array.isArray(obj), 'keys:', Object.keys(obj || {}).length)
       
       const location = findLocationInText(jsonText, currentPath)
       locations.set(currentPath, location)
       
       if (obj === null || typeof obj !== 'object') {
-        console.log('[traverse] Primitive, stopping')
         return
       }
       
       if (Array.isArray(obj)) {
-        console.log('[traverse] Array with', obj.length, 'items')
         obj.forEach((item, index) => {
           traverse(item, `${currentPath}[${index}]`)
         })
       } else {
         const entries = Object.entries(obj)
-        console.log('[traverse] Object with', entries.length, 'entries:', entries.map(([k]) => k))
         entries.forEach(([key]) => {
           traverse(obj[key as keyof typeof obj], `${currentPath}.${key}`)
         })
@@ -77,7 +72,6 @@ export function parseJsonWithLocation(jsonText: string): {
     }
     
     traverse(data, 'root')
-    console.log('[parseJsonWithLocation] Found', locations.size, 'locations')
     return { data, locations }
   } catch (e) {
     console.error('[parseJsonWithLocation] Parse error:', e)
@@ -126,7 +120,6 @@ export function lineToPath(jsonText: string, line: number): string | null {
 export function findPathByKeyLabel(jsonText: string, keyLabel: string, approximateLine: number): string | null {
   const { locations } = parseJsonWithLocation(jsonText)
   
-  console.log('[findPathByKeyLabel] Input:', { keyLabel, approximateLine, totalLocations: locations.size })
   
   let bestMatch: { path: string; line: number; score: number } | null = null
   
@@ -139,7 +132,6 @@ export function findPathByKeyLabel(jsonText: string, keyLabel: string, approxima
     const cleanLastPart = lastPart.replace(/^"|"$/g, '')
     const cleanKeyLabel = keyLabel.replace(/^"|"$/g, '')
 
-    console.log('[findPathByKeyLabel] Checking:', path, 'lastPart:', cleanLastPart, 'vs', cleanKeyLabel, 'match:', cleanLastPart === cleanKeyLabel)
 
     if (cleanLastPart === cleanKeyLabel) {
       // Calculate how close this is to our target line
@@ -148,7 +140,6 @@ export function findPathByKeyLabel(jsonText: string, keyLabel: string, approxima
       // Score: prefer closer lines
       const score = 1000 - lineDiff * 10
 
-      console.log('[findPathByKeyLabel] Match found! Line:', location.line, 'Diff:', lineDiff, 'Score:', score)
 
       if (!bestMatch || score > bestMatch.score) {
         bestMatch = {
@@ -160,6 +151,5 @@ export function findPathByKeyLabel(jsonText: string, keyLabel: string, approxima
     }
   }
   
-  console.log('[findPathByKeyLabel] Result:', bestMatch?.path)
   return bestMatch?.path || null
 }

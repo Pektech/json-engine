@@ -120,19 +120,16 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
           
           // Get full JSON text directly from editor model
           const fullJsonText = getFullJsonText()
-          console.log('[CodeEditor] Full JSON length:', fullJsonText.length, 'chars')
           
           // Get the word at the cursor position (the key name)
           const model = editor.getModel()
           if (!model) return
           
           const wordInfo = model.getWordAtPosition(position)
-          console.log('[CodeEditor] Cursor:', position.lineNumber, ':', position.column, 'Word:', wordInfo?.word)
           
           if (!wordInfo || !wordInfo.word) {
             // No word at cursor, fall back to line-based path
             const path = lineToPath(fullJsonText, position.lineNumber)
-            console.log('[CodeEditor] No word, using line-based path:', path)
             if (path) onCursorPositionChange(path)
             return
           }
@@ -142,25 +139,20 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
           const isKey = lineContent.includes(`"${wordInfo.word}"`) && 
                         lineContent.indexOf(`"${wordInfo.word}"`) <= position.column
           
-          console.log('[CodeEditor] Is key?', isKey, 'Line content:', lineContent.substring(0, 50))
           
           if (isKey) {
             // This is a key, find the full path to this key
-            console.log('[CodeEditor] Calling findPathByKeyLabel with JSON length:', fullJsonText.length)
             const path = findPathByKeyLabel(fullJsonText, wordInfo.word, position.lineNumber)
-            console.log('[CodeEditor] Found path for key "', wordInfo.word, '":', path)
             if (path) {
               onCursorPositionChange(path)
             } else {
               // Fallback to line-based
               const fallbackPath = lineToPath(fullJsonText, position.lineNumber)
-              console.log('[CodeEditor] No path found, fallback:', fallbackPath)
               if (fallbackPath) onCursorPositionChange(fallbackPath)
             }
           } else {
             // This is a value, use line-based path
             const path = lineToPath(fullJsonText, position.lineNumber)
-            console.log('[CodeEditor] Value, using line-based:', path)
             if (path) onCursorPositionChange(path)
           }
         }
