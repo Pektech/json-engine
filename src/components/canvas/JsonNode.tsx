@@ -148,9 +148,21 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
     
     if (!confirm(`Delete "${label}"? This cannot be undone.`)) return
     
-    const { parsedJson, setJsonText } = useAppStore.getState()
+    const { parsedJson, setJsonText, selectPath } = useAppStore.getState()
+    
+    // Compute parent path: "root.users.0.name" → "root.users.0"
+    const lastDot = path.lastIndexOf('.')
+    const lastBracket = path.lastIndexOf('[')
+    const splitIndex = Math.max(lastDot, lastBracket)
+    const parentPath = splitIndex > 0 ? path.substring(0, splitIndex) : null
+    
     const updatedJson = deleteNodeAtPath(parsedJson, path)
     setJsonText(JSON.stringify(updatedJson, null, 2))
+    
+    // Select parent after deletion
+    if (parentPath) {
+      selectPath(parentPath)
+    }
   }
   
   const getMenuItems = (): ContextMenuItem[] => {
