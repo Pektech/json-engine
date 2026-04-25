@@ -18,6 +18,15 @@
       "agent": "Sisyphus-Junior",
       "category": "quick",
       "updated_at": "2026-04-25T14:37:06.208Z"
+    },
+    "todo:2": {
+      "task_key": "todo:2",
+      "task_label": "2",
+      "task_title": "Write TDD tests for json-to-graph.ts",
+      "session_id": "ses_23aeb8ef7ffek0M8NbQbW7ARnu",
+      "agent": "Sisyphus-Junior",
+      "category": "quick",
+      "updated_at": "2026-04-25T14:42:37.506Z"
     }
   }
 }

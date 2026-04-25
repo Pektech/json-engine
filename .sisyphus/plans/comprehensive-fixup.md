@@ -262,7 +262,7 @@ Max Concurrent: 4 (Waves 4+5)
   - Message: `fix(test): install ts-jest, fix jest config typo, fix file-manager test type`
   - Files: `jest.config.js`, `src/lib/file-manager.test.ts`, `package.json`, `package-lock.json`
 
-- [ ] 2. Write TDD tests for json-to-graph.ts
+- [x] 2. Write TDD tests for json-to-graph.ts
 
   **What to do**:
   - [ ] **RED**: Write failing test for `jsonToGraph()` — main transform function

@@ -21,3 +21,31 @@ All 5 tests pass:
 ## Verification
 
 `npm test` exits with code 0 (success).
+
+
+## T2: TDD Tests for json-to-graph.ts and path-to-line.ts (2026-04-25)
+
+### Test Coverage Summary
+- **json-to-graph.test.ts**: 26 tests covering all exported functions
+  - getJsonType: 8 tests (null, object, array, string, number, float, boolean types)
+  - getLabel: 6 tests (root path, nested objects, array indices, multiple array indices)
+  - jsonToGraph: 8 tests (empty object, simple object, nested object, arrays, primitives, value storage, depth tracking, path storage)
+  - countNodes: 4 tests (empty objects, multiple properties, nested objects, arrays)
+
+- **path-to-line.test.ts**: 20 tests covering all exported functions
+  - parseJsonWithLocation: 5 tests (valid JSON, locations map, nested paths, invalid JSON, arrays)
+  - pathToLine: 5 tests (root path, multi-line JSON, nested paths, non-existent paths, array indices)
+  - lineToPath: 5 tests (line 1, property lines, nested paths, empty JSON, scoring preference)
+  - findPathByKeyLabel: 5 tests (simple key, multiple keys, non-existent keys, nested keys, approximate line matching)
+
+### Test Execution
+Both test files pass:
+- `npm test src/lib/json-to-graph.test.ts`: PASS (26 tests)
+- `npm test src/lib/path-to-line.test.ts`: PASS (20 tests)
+
+### Patterns Used
+1. Followed existing file-manager.test.ts pattern with jsdom environment
+2. Used Jest globals (describe, it, expect) without explicit imports
+3. Explicit assertions (no snapshot tests)
+4. Test structure mirrors describe/it hierarchy from source files
+5. No `as any` type assertions or `@ts-ignore` comments used
