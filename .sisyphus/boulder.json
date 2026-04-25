@@ -27,6 +27,15 @@
       "agent": "Sisyphus-Junior",
       "category": "quick",
       "updated_at": "2026-04-25T14:42:37.506Z"
+    },
+    "todo:3": {
+      "task_key": "todo:3",
+      "task_label": "3",
+      "task_title": "Fix path-to-line.ts TypeScript errors",
+      "session_id": "ses_23ae757e2ffelsTQRK7IyGxqP9",
+      "agent": "Sisyphus-Junior",
+      "category": "quick",
+      "updated_at": "2026-04-25T14:45:33.544Z"
     }
   }
 }

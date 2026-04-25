@@ -130,26 +130,26 @@ export function findPathByKeyLabel(jsonText: string, keyLabel: string, approxima
   
   let bestMatch: { path: string; line: number; score: number } | null = null
   
-  locations.forEach((location, path) => {
+  for (const [path, location] of Array.from(locations.entries())) {
     // Extract the key label from this path
     const pathParts = path.split(/[.\[\]]/).filter(Boolean)
     const lastPart = pathParts[pathParts.length - 1]
-    
+
     // Check if this path's key matches our search (remove quotes if present)
     const cleanLastPart = lastPart.replace(/^"|"$/g, '')
     const cleanKeyLabel = keyLabel.replace(/^"|"$/g, '')
-    
+
     console.log('[findPathByKeyLabel] Checking:', path, 'lastPart:', cleanLastPart, 'vs', cleanKeyLabel, 'match:', cleanLastPart === cleanKeyLabel)
-    
+
     if (cleanLastPart === cleanKeyLabel) {
       // Calculate how close this is to our target line
       const lineDiff = Math.abs(location.line - approximateLine)
-      
+
       // Score: prefer closer lines
       const score = 1000 - lineDiff * 10
-      
+
       console.log('[findPathByKeyLabel] Match found! Line:', location.line, 'Diff:', lineDiff, 'Score:', score)
-      
+
       if (!bestMatch || score > bestMatch.score) {
         bestMatch = {
           path,
@@ -158,7 +158,7 @@ export function findPathByKeyLabel(jsonText: string, keyLabel: string, approxima
         }
       }
     }
-  })
+  }
   
   console.log('[findPathByKeyLabel] Result:', bestMatch?.path)
   return bestMatch?.path || null

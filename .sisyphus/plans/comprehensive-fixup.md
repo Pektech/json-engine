@@ -330,7 +330,7 @@ Max Concurrent: 4 (Waves 4+5)
   - Message: `test: add TDD tests for json-to-graph and path-to-line modules`
   - Files: `src/lib/json-to-graph.test.ts`, `src/lib/path-to-line.test.ts`
 
-- [ ] 3. Fix path-to-line.ts TypeScript errors
+- [x] 3. Fix path-to-line.ts TypeScript errors
 
   **What to do**:
   - [ ] Fix `path-to-line.ts:163-164`: TypeScript narrows `bestMatch` to `never` after `forEach` + null check pattern
