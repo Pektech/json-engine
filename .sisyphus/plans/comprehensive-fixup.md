@@ -1008,23 +1008,23 @@ Max Concurrent: 4 (Waves 4+5)
 > **Do NOT auto-proceed after verification. Wait for user's explicit approval before marking work complete.**
 > **Never mark F1-F5 as checked before getting user's okay.** Rejection or user feedback -> fix -> re-run -> present again -> wait for okay.
 
-- [ ] F1. **Plan Compliance Audit** — `oracle`
+- [x] F1. **Plan Compliance Audit** — `oracle`
   Read the plan end-to-end. For each "Must Have": verify implementation exists (read file, run command). For each "Must NOT Have": search codebase for forbidden patterns (`console.log` in src/, `reactflow` dep, `MainWorkspace.tsx`, `stores/` directory). Check evidence files exist in `.sisyphus/evidence/`.
   Output: `Must Have [N/N] | Must NOT Have [21/21] | Tasks [N/N] | VERDICT: APPROVE/REJECT`
 
-- [ ] F2. **Code Quality Review** — `unspecified-high`
+- [x] F2. **Code Quality Review** — `unspecified-high`
   Run `npx tsc --noEmit` + `npm run lint`. Review all changed files for: `as any`/`@ts-ignore` (should be 0), empty catches, commented-out code, unused imports. Check: `JsonNode.tsx` <300 lines, no `console.log` in src/, all store imports `@/store/` (not `@/stores/`).
   Output: `Build [PASS/FAIL] | Lint [PASS/FAIL] | TsNoImplicitAny [PASS/FAIL] | JsonNodeLines [N<300] | VERDICT`
 
-- [ ] F3. **Real Manual QA** — `unspecified-high` (+ `playwright` skill if UI)
+- [x] F3. **Real Manual QA** — `unspecified-high` (+ `playwright` skill if UI)
   Start from clean state. Execute EVERY QA scenario from EVERY task. Test cross-task integration (keyboard shortcuts + canvas, validation + editor, node CRUD after refactoring). Test edge cases: empty JSON, large JSON, invalid JSON. Save to `.sisyphus/evidence/final-qa/`.
   Output: `Scenarios [N/N pass] | Integration [N/N] | Edge Cases [N tested] | VERDICT:`
 
-- [ ] F4. **Scope Fidelity Check** — `deep`
+- [x] F4. **Scope Fidelity Check** — `deep`
   For each task: read "What to do", read actual diff (git log/diff). Verify 1:1 — everything in spec was built (no missing), nothing beyond spec was built (no creep). Check "Must NOT do" compliance. Detect cross-task contamination. Flag unaccounted changes.
   Output: `Tasks [N/N compliant] | Contamination [CLEAN/N issues] | Unaccounted [CLEAN/N files] | VERDICT:`
 
-- [ ] F5. **Full Test Suite Execution** — `quick`
+- [x] F5. **Full Test Suite Execution** — `quick`
   Run full test pipeline in sequence:
   1. `npm test` — all unit tests pass
   2. `npm run test:e2e` — all E2E tests pass
