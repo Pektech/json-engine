@@ -144,6 +144,8 @@ function NodeCanvasContent({ json, onNodeSelect, selectedNodeId, searchQuery = '
           nodeStrokeWidth={3}
           zoomable
           pannable
+          nodeColor={() => '#353534'}
+          maskColor="rgba(0, 0, 0, 0.7)"
         />
         <Background color="#2a2a2a" gap={24} size={1} />
       </ReactFlow>

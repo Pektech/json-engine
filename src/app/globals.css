@@ -57,3 +57,37 @@ input[type="text"][placeholder*="Search" i] {
 .selected-line-margin {
   background-color: rgba(99, 102, 241, 0.5) !important;
 }
+
+/* ReactFlow Controls dark styling */
+.react-flow__controls {
+  background-color: #201f1f;
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+}
+
+.react-flow__controls-button {
+  background-color: #201f1f !important;
+  border-bottom: 1px solid #2a2a2a !important;
+  color: #e5e2e1 !important;
+}
+
+.react-flow__controls-button:hover {
+  background-color: #2a2a2a !important;
+}
+
+.react-flow__controls-button svg {
+  fill: #e5e2e1 !important;
+}
+
+.react-flow__controls-button:last-child {
+  border-bottom: none !important;
+}
+
+/* ReactFlow MiniMap dark styling */
+.react-flow__minimap {
+  background-color: #201f1f;
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+}
