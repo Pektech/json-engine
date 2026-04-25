@@ -49,3 +49,11 @@ Both test files pass:
 3. Explicit assertions (no snapshot tests)
 4. Test structure mirrors describe/it hierarchy from source files
 5. No `as any` type assertions or `@ts-ignore` comments used
+
+## Keyboard Shortcut Wiring (T6)
+- `useKeyboardShortcuts` is a void hook (no return value) — sets up event listeners via useEffect side effects + react-hotkeys-hook
+- `setOnOpenHelp` is a **separate exported function** (not returned by the hook) — registers a module-level closure callback
+- App Router `page.tsx` must have `'use client'` directive when using useState/useEffect
+- TopAppBar state lifting: replaced local `useState(false)` with `TopAppBarProps` interface accepting `showHelp` + `setShowHelp`
+- MainWorkspace.tsx was orphaned (zero imports) — deleted to consolidate hook to single location
+- Grep check: `useKeyboardShortcuts` appears in exactly 2 files: hook definition + page.tsx invocation

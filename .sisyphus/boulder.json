@@ -36,6 +36,15 @@
       "agent": "Sisyphus-Junior",
       "category": "quick",
       "updated_at": "2026-04-25T14:45:33.544Z"
+    },
+    "todo:5": {
+      "task_key": "todo:5",
+      "task_label": "5",
+      "task_title": "Remove dead reactflow dependency + npm install",
+      "session_id": "ses_23ae21d2effeZ24aQR47XYuOXb",
+      "agent": "Sisyphus-Junior",
+      "category": "quick",
+      "updated_at": "2026-04-25T14:50:32.188Z"
     }
   }
 }

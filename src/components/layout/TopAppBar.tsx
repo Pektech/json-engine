@@ -1,10 +1,13 @@
 'use client'
 
-import { useState } from 'react'
 import { KeyboardShortcutsHelp } from './KeyboardShortcutsHelp'
 
-export function TopAppBar() {
-  const [showHelp, setShowHelp] = useState(false)
+interface TopAppBarProps {
+  showHelp: boolean
+  setShowHelp: (isOpen: boolean) => void
+}
+
+export function TopAppBar({ showHelp, setShowHelp }: TopAppBarProps) {
 
   return (
     <>

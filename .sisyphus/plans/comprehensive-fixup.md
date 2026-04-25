@@ -380,7 +380,7 @@ Max Concurrent: 4 (Waves 4+5)
   - Message: `fix(types): resolve TypeScript narrowing errors in path-to-line.ts`
   - Files: `src/lib/path-to-line.ts`
 
-- [ ] 4. Verify build passes (full build check)
+- [x] 4. Verify build passes (full build check)
 
   **What to do**:
   - [ ] Run `npx tsc --noEmit` — verify 0 errors
@@ -477,7 +477,7 @@ Max Concurrent: 4 (Waves 4+5)
   - Message: `chore(deps): remove unused reactflow v11 dependency (kept @xyflow/react v12)`
   - Files: `package.json`, `package-lock.json`
 
-- [ ] 6. Wire useKeyboardShortcuts to page.tsx + setOnOpenHelp to TopAppBar
+- [x] 6. Wire useKeyboardShortcuts to page.tsx + setOnOpenHelp to TopAppBar
 
   **What to do**:
   - [ ] In `page.tsx`: Import and call the hook + setOnOpenHelp:
@@ -614,7 +614,7 @@ Max Concurrent: 4 (Waves 4+5)
   - Message: `fix(ui): wire keyboard shortcuts to active component tree, add setOnOpenHelp to TopAppBar`
   - Files: `src/app/page.tsx`, `src/components/layout/TopAppBar.tsx`
 
-- [ ] 7. Wire schema validation loadSchema() on app init
+- [x] 7. Wire schema validation loadSchema() on app init
 
   **What to do**:
   - [ ] Find where JSON is loaded/parsed (likely `app-store.ts` or `useJsonDocument` hook)

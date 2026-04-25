@@ -212,12 +212,14 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
 
   loadFile: async (filePath: string, content: string) => {
     set({ currentFile: filePath })
-    
+
+    validationService.loadSchema({})
+
     const persisted = await loadNodePositions(filePath)
     if (persisted) {
       set({ nodePositions: persisted.positions })
     }
-    
+
     get().setJsonText(content)
   },
 
