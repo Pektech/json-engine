@@ -195,7 +195,7 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
       const keyName = 'pasted_' + Date.now()
       const updatedJson = insertNodeAtPath(parsedJson, path, keyName, clipboardData.value)
       setJsonText(JSON.stringify(updatedJson, null, 2))
-      // Keep selection on current node (paste target)
+      setTimeout(() => selectPath(path), 50)
     } catch (e) {
       console.error('Paste failed:', e)
     }
