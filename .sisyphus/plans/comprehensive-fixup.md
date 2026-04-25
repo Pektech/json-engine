@@ -664,7 +664,7 @@ Max Concurrent: 4 (Waves 4+5)
   - Message: `feat(validation): wire up schema validation loadSchema() on app init`
   - Files: `src/store/app-store.ts` or `src/hooks/useJsonDocument.ts`
 
-- [ ] 8. Remove orphaned dead code files
+- [x] 8. Remove orphaned dead code files
 
   **What to do**:
   - [ ] Delete `src/components/layout/MainWorkspace.tsx` (orphaned, zero imports) — only after confirming keyboard hook works in new location (T6)
