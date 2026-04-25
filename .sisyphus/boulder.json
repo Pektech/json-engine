@@ -2,10 +2,20 @@
   "active_plan": "/media/richard-leddy/extra/json_editor_openclaw/.sisyphus/plans/comprehensive-fixup.md",
   "started_at": "2026-04-25T14:32:24.289Z",
   "session_ids": [
-    "ses_23b22421dffejS5wOFo2hWSTTs"
+    "ses_23b22421dffejS5wOFo2hWSTTs",
+    "ses_23ac12018ffeiWIGTz6YlCCfkb",
+    "ses_23ac12017ffeZud1UKCDLD3zg8",
+    "ses_23ac12011ffeuq6kBvWm33QLxU",
+    "ses_23ac11f56ffenM3qK2d4rJw1AK",
+    "ses_23ac11f53ffe4931Q2FMEWqPUg"
   ],
   "session_origins": {
-    "ses_23b22421dffejS5wOFo2hWSTTs": "direct"
+    "ses_23b22421dffejS5wOFo2hWSTTs": "direct",
+    "ses_23ac12018ffeiWIGTz6YlCCfkb": "appended",
+    "ses_23ac12017ffeZud1UKCDLD3zg8": "appended",
+    "ses_23ac12011ffeuq6kBvWm33QLxU": "appended",
+    "ses_23ac11f56ffenM3qK2d4rJw1AK": "appended",
+    "ses_23ac11f53ffe4931Q2FMEWqPUg": "appended"
   },
   "plan_name": "comprehensive-fixup",
   "agent": "atlas",
@@ -50,10 +60,10 @@
       "task_key": "todo:8",
       "task_label": "8",
       "task_title": "Remove orphaned dead code files",
-      "session_id": "ses_23acf2795ffe4TdSzsh4FERc2G",
+      "session_id": "ses_23abbda7affe4cHkOgTEm5dteV",
       "agent": "Sisyphus-Junior",
-      "category": "unspecified-high",
-      "updated_at": "2026-04-25T15:23:54.586Z"
+      "category": "quick",
+      "updated_at": "2026-04-25T15:32:09.544Z"
     }
   }
 }
