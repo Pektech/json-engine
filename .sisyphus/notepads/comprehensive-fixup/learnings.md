@@ -105,3 +105,53 @@ Both test files pass:
 ## Verification
 - npm run build: PASSED
 - npm test src/lib/json-mutations.test.ts: PASSED (25 tests)
+
+## Bundle Size Measurements (Settings Cleanup - 2026-04-25)
+
+### Build Output Summary
+- **Route / First Load JS**: 212 kB
+- **Route /_not-found**: 87.2 kB
+- **Shared First Load JS**: 86.4 kB
+
+### Chunk Breakdown
+| Chunk | Size | Notes |
+|-------|------|-------|
+| 335-aa9bcabfdac27af0.js | 84.5 kB | Main app chunk (shared) |
+| 178-c39a9156fcd6eeac.js | 245 kB | Lazy loaded (Monaco likely) |
+| 770-843cf7c67cbe2c0a.js | 256 kB | Lazy loaded (canvas/editor) |
+| validation-83c8cefbd70c32a0.js | 99.4 kB | Validation logic |
+| polyfills | 89.2 kB | Browser compatibility |
+| CSS chunks | 40 kB total | Tailwind + custom styles |
+
+### Settings Tab Changes
+- Removed Settings nav item from SideNavBar.tsx (commented out with explanation)
+- Simplified Settings panel placeholder in EditorWorkspace.tsx
+- No measurable bundle size impact (settings was just a placeholder)
+
+### Observations
+- Monaco editor (chunk 178, ~245kB) is lazy-loaded via Suspense - good
+- First Load JS at 212kB is reasonable for a visual JSON editor
+- No immediate optimization targets - bundle is well-structured
+
+## E2E Test Expansion (2026-04-25)
+
+### Files Created
+- `e2e/pages/CanvasPage.ts` — page object with canvas helpers (controls, minimap, background grid)
+- `e2e/specs/03-file-workflow.spec.ts` — file open/format button visibility
+- `e2e/specs/06-canvas.spec.ts` — canvas container and zoom/pan controls
+- `e2e/specs/07-validation.spec.ts` — error panel and validation errors
+- `e2e/specs/08-keyboard.spec.ts` — additional keyboard shortcut tests (F1, Ctrl+Shift+F, Ctrl+O)
+- `e2e/specs/09-bidirectional-sync.spec.ts` — editor/canvas split view and sidebar nav
+
+### Source Changes (to support testable selectors)
+- `EditorWorkspace.tsx`: Added `data-testid="node-canvas"` to canvas wrapper container
+- `EditorWorkspace.tsx`: Changed placeholder text from "Open a file..." to "Select a file..." (avoids matching text=Open selector)
+- `SideNavBar.tsx`: Added `aria-label="View navigation"` to nav element
+- `EditorToolbar.tsx`: Added Save button with `aria-label="Save file"` and `onSave` prop
+- `AppPage.ts`: Updated `saveButton` selector from `text=Save` to `getByRole('button', { name: 'Save file' })` (avoids matching child span)
+
+### Key Learnings
+1. **ReactFlow canvas not always rendered**: NodeCanvas is conditionally rendered only when `nodes.length > 0`. Without loaded JSON, it shows a placeholder div. Solution: wrap both branches in a `data-testid` container in EditorWorkspace.tsx
+2. **Playwright `text=` matches child elements**: `locator('text=Open')` matches both text and its parent. Use `getByRole('button', { name: 'Open' })` to match only button elements
+3. **Playwright `.or()` with multi-match causes strict mode violation**: If either side of `.or()` matches multiple elements, Playwright throws. Use `.first()` to resolve ambiguity
+4. **Monaco editor lazy loading is flaky in E2E**: `waitForLoadState('networkidle')` doesn't guarantee Monaco DOM is ready. Pre-existing 04-editor.spec.ts has intermittent failures (< 5% rate)

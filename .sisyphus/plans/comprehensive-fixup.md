@@ -887,7 +887,7 @@ Max Concurrent: 4 (Waves 4+5)
 
   **Commit**: NO (grouped with Wave 4)
 
-- [ ] 12. Expand E2E test coverage (critical paths)
+- [x] 12. Expand E2E test coverage (critical paths)
 
   **What to do**:
   - [ ] Create `e2e/specs/03-file-workflow.spec.ts` — file open/save workflow test
@@ -952,7 +952,7 @@ Max Concurrent: 4 (Waves 4+5)
   - Message: `test(e2e): expand coverage for file workflow, canvas, validation, keyboard, sync critical paths`
   - Files: `e2e/specs/03-file-workflow.spec.ts`, `e2e/specs/06-canvas.spec.ts`, `e2e/specs/07-validation.spec.ts`, `e2e/specs/08-keyboard.spec.ts`, `e2e/specs/09-bidirectional-sync.spec.ts`
 
-- [ ] 13. Settings placeholder cleanup + bundle measurement
+- [x] 13. Settings placeholder cleanup + bundle measurement
 
   **What to do**:
   - [ ] In `src/components/workspace/EditorWorkspace.tsx`: Replace "Settings" placeholder tab with a minimal but functional settings panel OR remove the Settings tab entirely (whichever is less disruptive)

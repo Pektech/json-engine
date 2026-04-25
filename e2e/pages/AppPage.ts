@@ -11,7 +11,7 @@ export class AppPage {
   constructor(page: Page) {
     this.page = page;
     this.openButton = page.locator('[aria-label="Open file"]').or(page.locator('text=Open'));
-    this.saveButton = page.locator('[aria-label="Save file"]').or(page.locator('text=Save'));
+    this.saveButton = page.getByRole('button', { name: 'Save file' }).or(page.getByRole('button', { name: 'Save' }).first());
     this.canvas = page.locator('[data-testid="node-canvas"]').or(page.locator('.react-flow'));
     this.editor = page.locator('.monaco-editor');
     this.searchInput = page.locator('[placeholder*="search" i]').or(page.locator('input[type="search"]'));

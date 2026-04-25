@@ -45,6 +45,15 @@
       "agent": "Sisyphus-Junior",
       "category": "quick",
       "updated_at": "2026-04-25T15:08:50.181Z"
+    },
+    "todo:8": {
+      "task_key": "todo:8",
+      "task_label": "8",
+      "task_title": "Remove orphaned dead code files",
+      "session_id": "ses_23acf2795ffe4TdSzsh4FERc2G",
+      "agent": "Sisyphus-Junior",
+      "category": "unspecified-high",
+      "updated_at": "2026-04-25T15:23:54.586Z"
     }
   }
 }
