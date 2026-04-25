@@ -214,7 +214,7 @@ export function EditorWorkspace() {
               onSearch={handleEditorSearch}
               errorCount={parseError ? 1 : 0}
               warningCount={validationMarkers.length}
-              currentPath={selectedPath}
+    
             />
             
             {parseError && (

@@ -5,7 +5,6 @@ interface EditorToolbarProps {
   onSave?: () => void
   errorCount?: number
   warningCount?: number
-  currentPath?: string | null
 }
 
 export function EditorToolbar({
@@ -15,13 +14,7 @@ export function EditorToolbar({
   onSave,
   errorCount = 0,
   warningCount = 0,
-  currentPath,
 }: EditorToolbarProps) {
-  const formatPath = (path: string | null): string => {
-    if (!path) return ''
-    return path.replace(/\./g, ' > ').replace(/\[(\d+)\]/g, '[$1]')
-  }
-  
   return (
     <div className="flex items-center justify-between px-4 py-2 h-12 bg-surface-container-low border-b border-outline-variant/10">
       <div className="flex items-center gap-2">
@@ -60,20 +53,7 @@ export function EditorToolbar({
         </button>
       </div>
       
-      <div className="flex-1 px-4">
-        {currentPath && (
-          <div className="flex items-center gap-1 text-sm text-zinc-400 font-mono">
-            <span className="text-zinc-500">root</span>
-            {currentPath !== 'root' && (
-              <>
-                <span className="text-zinc-600">/</span>
-                <span className="text-primary">{formatPath(currentPath.replace('root.', ''))}</span>
-              </>
-            )}
-          </div>
-        )}
-      </div>
-      
+
       <div className="flex items-center gap-4">
         {(errorCount > 0 || warningCount > 0) && (
           <div className="flex items-center gap-3">

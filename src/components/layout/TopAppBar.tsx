@@ -4,10 +4,16 @@ import { KeyboardShortcutsHelp } from './KeyboardShortcutsHelp'
 
 interface TopAppBarProps {
   showHelp: boolean
+  currentPath?: string | null
   setShowHelp: (isOpen: boolean) => void
 }
 
-export function TopAppBar({ showHelp, setShowHelp }: TopAppBarProps) {
+export function TopAppBar({ showHelp, setShowHelp, currentPath }: TopAppBarProps) {
+
+  const formatPath = (path: string | null): string => {
+    if (!path) return ''
+    return path.replace(/\\./g, ' › ').replace(/\[(d+)\]/g, '[$1]')
+  }
 
   return (
     <>
