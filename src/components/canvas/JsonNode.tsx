@@ -193,10 +193,9 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
     try {
       const clipboardData = JSON.parse(clipboardStr)
       const keyName = 'pasted_' + Date.now()
-      // Select target FIRST to prevent auto-center from jumping
-      selectPath(path)
       const updatedJson = insertNodeAtPath(parsedJson, path, keyName, clipboardData.value)
       setJsonText(JSON.stringify(updatedJson, null, 2))
+      setTimeout(() => selectPath(path), 500)
     } catch (e) {
       console.error('Paste failed:', e)
     }

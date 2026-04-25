@@ -39,7 +39,6 @@ function NodeCanvasContent({ json, onNodeSelect, selectedNodeId, searchQuery = '
   const { setFocusedArea } = useFocusContext()
   const { fitView, setCenter, getZoom } = useReactFlow()
   const previousSelectedNodeId = useRef<string | null>(null)
-  const skipNextAutoCenter = useRef(false)
   
   const graphData = useMemo(() => {
     return jsonToGraph(json)
@@ -87,10 +86,6 @@ function NodeCanvasContent({ json, onNodeSelect, selectedNodeId, searchQuery = '
     
     if (!selectedNodeId) return
     if (selectedNodeId === previousSelectedNodeId.current) return
-    if (skipNextAutoCenter.current) {
-      skipNextAutoCenter.current = false
-      return
-    }
     
     // Wait for nodes to be ready
     const timer = setTimeout(() => {
