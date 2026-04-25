@@ -23,6 +23,7 @@ interface AppState {
   nodePositions: Record<string, { x: number; y: number }>
   userOverrideSave: boolean
   gatewayToken: string | null
+  currentFileHandle: FileSystemFileHandle | null
 }
 
 interface AppActions {
@@ -42,6 +43,7 @@ interface AppActions {
   savePositions: () => void
   setGatewayToken: (token: string | null) => void
   clearGatewayToken: () => void
+  setFileHandle: (handle: FileSystemFileHandle | null) => void
 }
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
@@ -63,6 +65,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   nodePositions: {},
     userOverrideSave: false,
     gatewayToken: null,
+    currentFileHandle: null,
 
   setJsonText: (text: string) => {
     set({ jsonText: text, isDirty: true, validationErrors: [] })
@@ -248,4 +251,5 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   // See: .planning/PROJECT.md § Constraints
   setGatewayToken: (token: string | null) => set({ gatewayToken: token }),
   clearGatewayToken: () => set({ gatewayToken: null }),
+  setFileHandle: (handle: FileSystemFileHandle | null) => set({ currentFileHandle: handle }),
 }))

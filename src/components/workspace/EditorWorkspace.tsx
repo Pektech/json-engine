@@ -65,15 +65,20 @@ export function EditorWorkspace() {
   }, [])
 
   const handleSaveFile = useCallback(async () => {
-    const { jsonText } = useAppStore.getState()
+    const { jsonText, currentFileHandle, currentFile } = useAppStore.getState()
     try {
-      const blob = new Blob([jsonText], { type: 'application/json' })
-      const a = document.createElement('a')
-      const url = URL.createObjectURL(blob)
-      a.href = url
-      a.download = 'data.json'
-      a.click()
-      URL.revokeObjectURL(url)
+      if (currentFileHandle) {
+        const handle = { handle: currentFileHandle, name: currentFile, path: currentFile }
+        await fileManager.saveFile(handle as any, jsonText)
+      } else {
+        const file = new Blob([jsonText], { type: 'application/json' })
+        const a = document.createElement('a')
+        const url = URL.createObjectURL(file)
+        a.href = url
+        a.download = currentFile || 'data.json'
+        a.click()
+        URL.revokeObjectURL(url)
+      }
     } catch (error) {
       console.error('Failed to save file:', error)
     }
@@ -94,6 +99,7 @@ export function EditorWorkspace() {
       // Successfully opened - load into editor using getState to avoid dependency issues
       const { loadFile: appLoadFile } = useAppStore.getState();
       await appLoadFile(result.handle.name, result.content);
+      useAppStore.getState().setFileHandle(result.handle.handle || null);
     } catch (error) {
       console.error('Failed to open file:', error);
     }

@@ -47,16 +47,18 @@ export function useKeyboardShortcuts() {
       
       // Successfully opened - load into editor
       await loadFile(result.handle.name, result.content);
+      useAppStore.getState().setFileHandle(result.handle.handle ?? null);
     } catch (error) {
       console.error('Failed to open file:', error);
     }
   };
 
   const handleSaveFile = async () => {
+    const { currentFileHandle, jsonText, currentFile } = useAppStore.getState();
     if (currentFile) {
       try {
-        const dummyHandle = { handle: null as any, name: currentFile, path: currentFile };
-        await saveFile(dummyHandle as any, jsonText);
+        const handle = { handle: currentFileHandle, name: currentFile, path: currentFile };
+        await saveFile(handle as any, jsonText);
       } catch (error) {
         console.error('Failed to save file:', error);
       }
