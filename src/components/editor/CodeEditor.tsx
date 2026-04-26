@@ -23,6 +23,18 @@ export interface CodeEditorHandle {
   find: () => void
 }
 
+// Simple debounce utility
+function debounce<Fn extends (...args: any[]) => any>(
+  fn: Fn,
+  delay: number
+): (...args: Parameters<Fn>) => void {
+  let timer: ReturnType<typeof setTimeout> | null = null
+  return (...args) => {
+    if (timer) clearTimeout(timer)
+    timer = setTimeout(() => fn(...args), delay)
+  }
+}
+
 export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
   function CodeEditor(
     { value, onChange, onValidate, selectedPath, onCursorPositionChange, theme = 'vs-dark' },
@@ -157,8 +169,9 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
           }
         }
         
-        // Listen to cursor changes (typing, arrow keys, clicks)
-        editor.onDidChangeCursorPosition(updateSelectionFromCursor)
+        // Listen to cursor changes with debounce to prevent selection jumping
+        const debouncedUpdateSelection = debounce(updateSelectionFromCursor, 100) // 100ms prevents selection jumping
+        editor.onDidChangeCursorPosition(debouncedUpdateSelection)
       },
       [onCursorPositionChange]
     )
