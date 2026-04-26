@@ -10,7 +10,10 @@ A visual JSON editor for OpenClaw configuration management. Edit complex JSON co
 - **Schema Validation**: Real-time validation against OpenClaw schemas
 - **Keyboard Shortcuts**: Power-user friendly shortcuts (Ctrl+O, Ctrl+S, etc.)
 - **File Operations**: Open and save files via File System Access API
-- **Dark Theme**: Easy on the eyes for long editing sessions
+- **Dark Theme**: Easy on the eyes for long editing sessions with Material Design 3 tokens
+- **Undo/Redo**: Full undo and redo support for both graph and editor changes
+- **Split View**: Draggable divider for adjustable editor/canvas layout
+- **Copy/Paste**: Right-click context menu with copy/paste operations for canvas nodes
 
 ## Prerequisites
 
@@ -48,13 +51,28 @@ npm run test:e2e
 npm run security:check
 ```
 
-## Usage
+## Getting Started
 
-1. Open the application in your browser (http://localhost:3030)
-2. Press `Ctrl+O` or click Open to select a JSON file
-3. Edit in the code editor or click nodes on the canvas
-4. Press `Ctrl+S` to save your changes
-5. Press `F1` to see all keyboard shortcuts
+New to JSON.engine? Here is a quick guide to get you editing in under a minute.
+
+### For Non-Developers
+
+1. **Open the app**: Visit the hosted URL or open the local development server
+2. **Open a file**: Press `Ctrl+O` and select any JSON file from your computer
+3. **Edit visually**: Click on nodes in the canvas to select and edit values
+4. **Edit in code**: Use the code editor on the left for direct text editing
+5. **Save your work**: Press `Ctrl+S` to save changes back to your file
+
+### Tips
+
+- Both the canvas and editor stay in sync. Edit in either place.
+- Use `Ctrl+Z` to undo mistakes
+- Drag the divider to resize the editor and canvas areas
+- Right-click on nodes for copy/paste options
+
+## Screenshots
+
+*Screenshots will be added here showing the main interface, split view layout, dark theme, and node editing features.*
 
 ## Keyboard Shortcuts
 
@@ -65,8 +83,26 @@ npm run security:check
 | `Ctrl+Shift+F` | Search in canvas |
 | `Ctrl+F` | Find in editor (Monaco) |
 | `F1` | Show keyboard shortcuts |
+| `Ctrl+Z` | Undo (graph and editor) |
+| `Ctrl+Shift+Z` | Redo (graph and editor) |
+| `Ctrl+Y` | Redo - alternative shortcut (graph and editor) |
 
-## Security
+## Browser Support
+
+JSON.engine requires a modern browser with File System Access API support.
+
+### Supported Browsers
+
+- **Chrome** 86+ (recommended)
+- **Edge** 86+ (recommended)
+
+### Not Supported
+
+- Safari (no File System Access API)
+- Firefox (no File System Access API)
+- Mobile browsers
+
+The File System Access API allows the app to open and save files directly to your computer without uploading to a server.
 
 - Gateway tokens are stored memory-only (never in localStorage)
 - Security audits run automatically in CI
