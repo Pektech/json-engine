@@ -77,7 +77,15 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
     historyIndex: 0,
 
   setJsonText: (text: string) => {
-    set({ jsonText: text, isDirty: true, validationErrors: [] })
+    let parsed: any = null
+    try {
+      parsed = JSON.parse(text)
+    } catch (e) {
+      // Invalid JSON - parsedJson stays as-is or becomes null
+      parsed = null
+    }
+    
+    set({ jsonText: text, parsedJson: parsed, isDirty: true, validationErrors: [] })
 
     // Clear existing debounce timer
     if (pendingHistoryPush) clearTimeout(pendingHistoryPush)
@@ -287,9 +295,17 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
     set((state) => {
       if (state.historyIndex > 0) {
         if (pendingHistoryPush) clearTimeout(pendingHistoryPush)
+        const prevJson = state.history[state.historyIndex - 1]
+        let parsed: any = null
+        try {
+          parsed = JSON.parse(prevJson)
+        } catch (e) {
+          parsed = null
+        }
         return {
           historyIndex: state.historyIndex - 1,
-          jsonText: state.history[state.historyIndex - 1],
+          jsonText: prevJson,
+          parsedJson: parsed,
           isDirty: true,
           validationErrors: []
         }
@@ -301,9 +317,17 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
     set((state) => {
       if (state.historyIndex < state.history.length - 1) {
         if (pendingHistoryPush) clearTimeout(pendingHistoryPush)
+        const nextJson = state.history[state.historyIndex + 1]
+        let parsed: any = null
+        try {
+          parsed = JSON.parse(nextJson)
+        } catch (e) {
+          parsed = null
+        }
         return {
           historyIndex: state.historyIndex + 1,
-          jsonText: state.history[state.historyIndex + 1],
+          jsonText: nextJson,
+          parsedJson: parsed,
           isDirty: true,
           validationErrors: []
         }
