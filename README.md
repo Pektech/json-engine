@@ -110,4 +110,4 @@ The File System Access API allows the app to open and save files directly to you
 
 ## License
 
-[License information]
+[MIT License](LICENSE)
