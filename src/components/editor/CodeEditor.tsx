@@ -1,12 +1,32 @@
 'use client'
 
 import { useRef, useCallback, forwardRef, useImperativeHandle, useEffect } from 'react'
-import Editor, { useMonaco } from '@monaco-editor/react'
-import * as monaco from 'monaco-editor'
+import dynamic from 'next/dynamic'
+import { useMonaco } from '@monaco-editor/react'
 import type { editor } from 'monaco-editor'
 import { pathToLine, lineToPath, findPathByKeyLabel } from '@/lib/path-to-line'
 import { useAppStore } from '@/store/app-store'
 import { useFocusContext } from '@/hooks/useFocusContext'
+
+const EditorLoading = () => (
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: '100%',
+      fontSize: '14px',
+      color: '#666',
+    }}
+  >
+    Loading editor...
+  </div>
+)
+
+const Editor = dynamic(() => import('@monaco-editor/react'), {
+  ssr: false,
+  loading: () => <EditorLoading />,
+})
 
 interface CodeEditorProps {
   value: string
@@ -200,6 +220,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     )
     
     useEffect(() => {
+      if (!monaco) return
       if (!editorRef.current || !selectedPath || !value) return
 
       const location = pathToLine(value, selectedPath)
@@ -219,7 +240,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
 
       const decorations = [
         {
-          range: new monaco!.Range(location.line, 1, location.line, 1),
+          range: new monaco.Range(location.line, 1, location.line, 1),
           options: {
             isWholeLine: true,
             className: 'selected-line-highlight',
@@ -232,7 +253,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
         decorationIdsRef.current || [],
         decorations
       )
-    }, [selectedPath, value])
+    }, [selectedPath, value, monaco])
     
     return (
       <Editor
