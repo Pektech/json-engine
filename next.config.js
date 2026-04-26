@@ -8,6 +8,7 @@ const nextConfig = {
   swcMinify: true,
   poweredByHeader: false,
   compress: true,
+  output: 'standalone',
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.optimization = config.optimization || {}
@@ -44,6 +45,13 @@ const nextConfig = {
             name: 'validation',
             chunks: 'all',
             priority: 15,
+          },
+          // Dagre layout library
+          dagre: {
+            test: /[\/]node_modules[\/](@dagrejs|dagre|graphlib)[\/]/,
+            name: 'dagre',
+            chunks: 'all',
+            priority: 20,
           },
         },
       }
