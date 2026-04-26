@@ -293,21 +293,67 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   
   undo: () => {
     set((state) => {
+      if (pendingHistoryPush) clearTimeout(pendingHistoryPush)
+      if (debounceTimer) {
+        clearTimeout(debounceTimer)
+        debounceTimer = null
+      }
+
       if (state.historyIndex > 0) {
-        if (pendingHistoryPush) clearTimeout(pendingHistoryPush)
         const prevJson = state.history[state.historyIndex - 1]
         let parsed: any = null
+
         try {
           parsed = JSON.parse(prevJson)
         } catch (e) {
           parsed = null
         }
-        return {
-          historyIndex: state.historyIndex - 1,
-          jsonText: prevJson,
-          parsedJson: parsed,
-          isDirty: true,
-          validationErrors: []
+
+        if (parsed !== null) {
+          const graph = jsonToGraph(parsed)
+          const layoutedNodes = layoutGraph(graph.nodes, graph.edges)
+
+          const { expandedNodes } = state
+          const visibleNodes = layoutedNodes.filter(node => {
+            const parentPath = node.id.split(/\.|\[/)[0]
+            return expandedNodes.has(parentPath) || node.id === 'root'
+          })
+
+          const visibleNodeIds = new Set(visibleNodes.map(n => n.id))
+          const visibleEdges = graph.edges.filter(edge =>
+            visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target)
+          )
+
+          return {
+            historyIndex: state.historyIndex - 1,
+            jsonText: prevJson,
+            parsedJson: parsed,
+            nodes: layoutedNodes,
+            edges: visibleEdges,
+            selectedPath: 'root',
+            isDirty: true,
+            parseError: null,
+            nodePositions: {},
+            validationErrors: []
+          }
+        } else {
+          return {
+            historyIndex: state.historyIndex - 1,
+            jsonText: prevJson,
+            parsedJson: null,
+            nodes: [],
+            edges: [],
+            selectedPath: null,
+            isDirty: true,
+            parseError: 'Invalid JSON in history',
+            validationErrors: [{
+              path: 'root',
+              line: 1,
+              column: 1,
+              message: 'Invalid JSON in history',
+              severity: 'error'
+            }]
+          }
         }
       }
       return {}
@@ -315,21 +361,67 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   },
   redo: () => {
     set((state) => {
+      if (pendingHistoryPush) clearTimeout(pendingHistoryPush)
+      if (debounceTimer) {
+        clearTimeout(debounceTimer)
+        debounceTimer = null
+      }
+
       if (state.historyIndex < state.history.length - 1) {
-        if (pendingHistoryPush) clearTimeout(pendingHistoryPush)
         const nextJson = state.history[state.historyIndex + 1]
         let parsed: any = null
+
         try {
           parsed = JSON.parse(nextJson)
         } catch (e) {
           parsed = null
         }
-        return {
-          historyIndex: state.historyIndex + 1,
-          jsonText: nextJson,
-          parsedJson: parsed,
-          isDirty: true,
-          validationErrors: []
+
+        if (parsed !== null) {
+          const graph = jsonToGraph(parsed)
+          const layoutedNodes = layoutGraph(graph.nodes, graph.edges)
+
+          const { expandedNodes } = state
+          const visibleNodes = layoutedNodes.filter(node => {
+            const parentPath = node.id.split(/\.|\[/)[0]
+            return expandedNodes.has(parentPath) || node.id === 'root'
+          })
+
+          const visibleNodeIds = new Set(visibleNodes.map(n => n.id))
+          const visibleEdges = graph.edges.filter(edge =>
+            visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target)
+          )
+
+          return {
+            historyIndex: state.historyIndex + 1,
+            jsonText: nextJson,
+            parsedJson: parsed,
+            nodes: layoutedNodes,
+            edges: visibleEdges,
+            selectedPath: 'root',
+            isDirty: true,
+            parseError: null,
+            nodePositions: {},
+            validationErrors: []
+          }
+        } else {
+          return {
+            historyIndex: state.historyIndex + 1,
+            jsonText: nextJson,
+            parsedJson: null,
+            nodes: [],
+            edges: [],
+            selectedPath: null,
+            isDirty: true,
+            parseError: 'Invalid JSON in history',
+            validationErrors: [{
+              path: 'root',
+              line: 1,
+              column: 1,
+              message: 'Invalid JSON in history',
+              severity: 'error'
+            }]
+          }
         }
       }
       return {}
