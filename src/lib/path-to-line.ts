@@ -150,33 +150,25 @@ export function lineToPath(jsonText: string, line: number): string | null {
  */
 export function findPathByKeyLabel(jsonText: string, keyLabel: string, approximateLine: number): string | null {
   const { locations } = parseJsonWithLocation(jsonText)
-  
-  
   let bestMatch: { path: string; line: number; score: number } | null = null
   
   for (const [path, location] of Array.from(locations.entries())) {
-    // Extract the key label from this path
     const pathParts = path.split(/[.\[\]]/).filter(Boolean)
     const lastPart = pathParts[pathParts.length - 1]
-
-    // Check if this path's key matches our search (remove quotes if present)
     const cleanLastPart = lastPart.replace(/^"|"$/g, '')
     const cleanKeyLabel = keyLabel.replace(/^"|"$/g, '')
 
-
     if (cleanLastPart === cleanKeyLabel) {
-      // Calculate how close this is to our target line
       const lineDiff = Math.abs(location.line - approximateLine)
 
-      // Score: prefer closer lines
-      const score = 1000 - lineDiff * 10
+      // Only consider keys AT or BEFORE the target line
+      // And only match if the line is EXACT or very close (within 1 line)
+      if (location.line <= approximateLine && (approximateLine - location.line) <= 1) {
+        // Prefer exact line match
+        const score = 1000 - (approximateLine - location.line) * 10 + pathParts.length * 50
 
-
-      if (!bestMatch || score > bestMatch.score) {
-        bestMatch = {
-          path,
-          line: location.line,
-          score
+        if (!bestMatch || score > bestMatch.score) {
+          bestMatch = { path, line: location.line, score }
         }
       }
     }
