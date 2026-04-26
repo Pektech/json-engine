@@ -73,12 +73,12 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
     userOverrideSave: false,
     gatewayToken: null,
     currentFileHandle: null,
-    history: [],
-    historyIndex: -1,
+    history: ['{}'],  // Start with initial empty JSON
+    historyIndex: 0,
 
-  setJsonText: (text: string, fromUndo = false) => {
+  setJsonText: (text: string, saveToHistory = false) => {
     set((state) => {
-      if (!fromUndo) {
+      if (saveToHistory) {
         // Save current state to history BEFORE change
         const newHistory = state.history.slice(0, state.historyIndex + 1)
         newHistory.push(state.jsonText)
@@ -243,11 +243,17 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   },
 
   loadFile: async (filePath: string, content: string) => {
+    // Initialize history with file content as first state
     set({
       currentFile: filePath,
-      history: [],
-      historyIndex: -1
+      history: [content],
+      historyIndex: 0,
+      jsonText: content,
+      isDirty: false,
+      validationErrors: []
     })
+    
+    // Note: jsonText already set above, no need to call setJsonText
 
     validationService.loadSchema({})
 
@@ -312,6 +318,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
         return {
           historyIndex: state.historyIndex - 1,
           jsonText: state.history[state.historyIndex - 1],
+          isDirty: true,  // Mark as dirty after undo
           validationErrors: []
         }
       }
@@ -325,6 +332,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
         return {
           historyIndex: state.historyIndex + 1,
           jsonText: state.history[state.historyIndex + 1],
+          isDirty: true,  // Mark as dirty after redo
           validationErrors: []
         }
       }
