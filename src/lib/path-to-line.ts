@@ -12,30 +12,45 @@ function getLinePosition(text: string, index: number): LineLocation {
 }
 
 function findLocationInText(jsonText: string, path: string): LineLocation {
-  if (path === 'root') {
-    return { line: 1, column: 1 }
-  }
+  if (path === 'root') return { line: 1, column: 1 }
   
-  const lastPart = path.split(/[.\[\]]/).filter(Boolean).pop()
+  const segments = path.split(/[.\[\]]/).filter(Boolean)
+  let scopeStart = 0
   
-  if (!lastPart) {
-    return { line: 1, column: 1 }
-  }
-  
-  const isArrayIndex = /^\d+$/.test(lastPart)
-  
-  if (isArrayIndex) {
-    const arrayPattern = new RegExp(`\\[${lastPart}\\]\\s*:`)
-    const match = jsonText.match(arrayPattern)
-    if (match && match.index !== undefined) {
-      return getLinePosition(jsonText, match.index)
+  for (let i = 0; i < segments.length; i++) {
+    const segment = segments[i]
+    const isArrIndex = /^\d+$/.test(segment)
+    
+    // Escape regex special chars in segment key name
+    const escapedSegment = segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    
+    // Pattern to find this key OR array index
+    const keyPattern = isArrIndex
+      ? new RegExp(`\\[${escapedSegment}\\]\\s*:`)
+      : new RegExp(`"${escapedSegment}"\\s*:`)
+    
+    // Search within the current scope (from scopeStart onwards)
+    const scopeText = jsonText.slice(scopeStart)
+    const match = scopeText.match(keyPattern)
+    
+    if (!match || match.index === undefined) {
+      // Fallback: search globally
+      const globalMatch = jsonText.match(keyPattern)
+      if (globalMatch && globalMatch.index !== undefined) {
+        return getLinePosition(jsonText, globalMatch.index)
+      }
+      return { line: 1, column: 1 }
     }
-  } else {
-    const objectPattern = new RegExp(`"${lastPart}"\\s*:`, 'm')
-    const match = jsonText.match(objectPattern)
-    if (match && match.index !== undefined) {
-      return getLinePosition(jsonText, match.index)
+    
+    const absoluteIndex = scopeStart + match.index
+    
+    // If this is the LAST segment, return ITS position  
+    if (i === segments.length - 1) {
+      return getLinePosition(jsonText, absoluteIndex)
     }
+    
+    // Move past key+colon: next iteration searches within value
+    scopeStart = absoluteIndex + match[0].length
   }
   
   return { line: 1, column: 1 }
