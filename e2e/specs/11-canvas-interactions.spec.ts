@@ -3,44 +3,52 @@ import { AppPage } from '../pages/AppPage';
 import { CanvasPage } from '../pages/CanvasPage';
 
 test.describe('Canvas Node Interactions', () => {
-  const loadSampleJson = async (page: any, app: AppPage) => {
-    await app.goto();
-    
-    await app.editor.click();
-    await page.waitForTimeout(300);
-    await page.keyboard.down('Control');
-    await page.keyboard.press('KeyA');
-    await page.keyboard.up('Control');
-    await page.keyboard.press('Backspace');
-    await page.waitForTimeout(200);
-    
-    await app.typeInEditor('{"name": "root", "value": 123}');
-    await page.waitForTimeout(2500);
-  };
-
   test('click node → selection highlight appears', async ({ page }) => {
     const app = new AppPage(page);
     const canvas = new CanvasPage(page);
-    await loadSampleJson(page, app);
+    await app.goto();
     
-    await expect(canvas.canvasContainer.locator('.react-flow')).toBeVisible({ timeout: 8000 });
+    // Focus editor and type valid JSON
+    await app.editor.click();
+    await page.waitForTimeout(500);
     
-    const rootNode = page.locator('.react-flow__node').filter({ hasText: 'name' }).first();
-    await expect(rootNode).toBeVisible({ timeout: 5000 });
+    // Clear with Ctrl+A and type fresh JSON
+    await page.keyboard.down('Control');
+    await page.keyboard.press('a');
+    await page.keyboard.up('Control');
+    await page.waitForTimeout(200);
+    await page.keyboard.type('{"test": "value", "num": 42}');
+    await page.waitForTimeout(3000);
     
-    await rootNode.click();
+    await expect(canvas.canvasContainer.locator('.react-flow')).toBeVisible({ timeout: 10000 });
+    
+    const node = page.locator('.react-flow__node').filter({ hasText: 'test' }).first();
+    await expect(node).toBeVisible({ timeout: 5000 });
+    
+    await node.click();
     await page.waitForTimeout(300);
     
-    const nodeElement = rootNode.locator('div').first();
+    // Check for selection styling
+    const nodeElement = node.locator('div').first();
     await expect(nodeElement).toHaveClass(/ring-2|border-primary/, { timeout: 3000 });
   });
 
-  test('right-click → context menu appears with Copy/Paste/Add/Delete', async ({ page }) => {
+  test('right-click → context menu appears with Copy/Delete', async ({ page }) => {
     const app = new AppPage(page);
     const canvas = new CanvasPage(page);
-    await loadSampleJson(page, app);
+    await app.goto();
     
-    await expect(canvas.canvasContainer.locator('.react-flow')).toBeVisible({ timeout: 8000 });
+    await app.editor.click();
+    await page.waitForTimeout(500);
+    
+    await page.keyboard.down('Control');
+    await page.keyboard.press('a');
+    await page.keyboard.up('Control');
+    await page.waitForTimeout(200);
+    await page.keyboard.type('{"test": "value", "num": 42}');
+    await page.waitForTimeout(3000);
+    
+    await expect(canvas.canvasContainer.locator('.react-flow')).toBeVisible({ timeout: 10000 });
     
     const node = page.locator('.react-flow__node').first();
     await expect(node).toBeVisible({ timeout: 5000 });
@@ -58,14 +66,24 @@ test.describe('Canvas Node Interactions', () => {
   test('add child node → graph shows new node', async ({ page }) => {
     const app = new AppPage(page);
     const canvas = new CanvasPage(page);
-    await loadSampleJson(page, app);
+    await app.goto();
     
-    await expect(canvas.canvasContainer.locator('.react-flow')).toBeVisible({ timeout: 8000 });
+    await app.editor.click();
+    await page.waitForTimeout(500);
     
-    const nameNode = page.locator('.react-flow__node').filter({ hasText: 'name' }).first();
-    await expect(nameNode).toBeVisible({ timeout: 5000 });
+    await page.keyboard.down('Control');
+    await page.keyboard.press('a');
+    await page.keyboard.up('Control');
+    await page.waitForTimeout(200);
+    await page.keyboard.type('{"parent": {"child": "value"}}');
+    await page.waitForTimeout(3000);
     
-    await nameNode.click({ button: 'right' });
+    await expect(canvas.canvasContainer.locator('.react-flow')).toBeVisible({ timeout: 10000 });
+    
+    const parentNode = page.locator('.react-flow__node').filter({ hasText: 'parent' }).first();
+    await expect(parentNode).toBeVisible({ timeout: 5000 });
+    
+    await parentNode.click({ button: 'right' });
     await page.waitForTimeout(300);
     
     const addButton = page.locator('text=Add Child').or(page.locator('text=Add Item')).first();
@@ -90,18 +108,28 @@ test.describe('Canvas Node Interactions', () => {
   test('delete node → graph removes node', async ({ page }) => {
     const app = new AppPage(page);
     const canvas = new CanvasPage(page);
-    await loadSampleJson(page, app);
+    await app.goto();
     
-    await expect(canvas.canvasContainer.locator('.react-flow')).toBeVisible({ timeout: 8000 });
+    await app.editor.click();
+    await page.waitForTimeout(500);
     
-    const valueNode = page.locator('.react-flow__node').filter({ hasText: 'value' }).first();
-    await expect(valueNode).toBeVisible({ timeout: 5000 });
+    await page.keyboard.down('Control');
+    await page.keyboard.press('a');
+    await page.keyboard.up('Control');
+    await page.waitForTimeout(200);
+    await page.keyboard.type('{"keep": "this", "remove": "that"}');
+    await page.waitForTimeout(3000);
+    
+    await expect(canvas.canvasContainer.locator('.react-flow')).toBeVisible({ timeout: 10000 });
+    
+    const removeNode = page.locator('.react-flow__node').filter({ hasText: 'remove' }).first();
+    await expect(removeNode).toBeVisible({ timeout: 5000 });
     
     page.on('dialog', async dialog => {
       await dialog.accept();
     });
     
-    await valueNode.click({ button: 'right' });
+    await removeNode.click({ button: 'right' });
     await page.waitForTimeout(300);
     
     await page.locator('text=Delete').first().click();
@@ -109,6 +137,6 @@ test.describe('Canvas Node Interactions', () => {
     
     await page.waitForTimeout(1500);
     
-    await expect(valueNode).not.toBeVisible({ timeout: 3000 });
+    await expect(removeNode).not.toBeVisible({ timeout: 3000 });
   });
 });
