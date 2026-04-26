@@ -1,0 +1,98 @@
+[WebServer]  [33m[1m⚠[22m[39m asset size limit: The following asset(s) exceed the recommended size limit (488 KiB).
+[WebServer] This can impact web performance.
+[WebServer] Assets: 
+[WebServer]   static/chunks/main-app.js (5.74 MiB)
+[WebServer]   static/chunks/app/page.js (643 KiB)
+[WebServer]   static/chunks/validation.js (625 KiB)
+[WebServer]   static/chunks/vendors-_app-pages-browser_node_modules_dagrejs_dagre_dist_dagre_esm_js-_app-pages-browser_no-921807.js (2.07 MiB)
+[WebServer] 
+[WebServer] entrypoint size limit: The following entrypoint(s) combined asset size exceeds the recommended limit (488 KiB). This can impact web performance.
+[WebServer] Entrypoints:
+[WebServer]   main-app (5.79 MiB)
+[WebServer]       static/chunks/webpack.js
+[WebServer]       static/chunks/main-app.js
+[WebServer]   app/page (3.43 MiB)
+[WebServer]       static/chunks/validation.js
+[WebServer]       static/chunks/vendors.js
+[WebServer]       static/css/vendors-_app-pages-browser_node_modules_dagrejs_dagre_dist_dagre_esm_js-_app-pages-browser_no-921807.css
+[WebServer]       static/chunks/vendors-_app-pages-browser_node_modules_dagrejs_dagre_dist_dagre_esm_js-_app-pages-browser_no-921807.js
+[WebServer]       static/chunks/app/page.js
+[WebServer] 
+[WebServer] webpack performance recommendations: 
+[WebServer] You can limit the size of your bundles by using import() or require.ensure to lazy load some parts of your application.
+[WebServer] For more info visit https://webpack.js.org/guides/code-splitting/
+
+Running 11 tests using 1 worker
+[WebServer]  [33m[1m⚠[22m[39m asset size limit: The following asset(s) exceed the recommended size limit (488 KiB).
+[WebServer] This can impact web performance.
+[WebServer] Assets: 
+[WebServer]   static/chunks/main-app.js (5.74 MiB)
+[WebServer]   static/chunks/app/page.js (643 KiB)
+[WebServer]   static/chunks/validation.js (625 KiB)
+[WebServer]   static/chunks/vendors-_app-pages-browser_node_modules_dagrejs_dagre_dist_dagre_esm_js-_app-pages-browser_no-921807.js (2.07 MiB)
+[WebServer] 
+[WebServer] entrypoint size limit: The following entrypoint(s) combined asset size exceeds the recommended limit (488 KiB). This can impact web performance.
+[WebServer] Entrypoints:
+[WebServer]   main-app (5.79 MiB)
+[WebServer]       static/chunks/webpack.js
+[WebServer]       static/webpack/webpack.54c3603b61423563.hot-update.js
+[WebServer]       static/chunks/main-app.js
+[WebServer]   app/page (3.43 MiB)
+[WebServer]       static/chunks/validation.js
+[WebServer]       static/chunks/vendors.js
+[WebServer]       static/css/vendors-_app-pages-browser_node_modules_dagrejs_dagre_dist_dagre_esm_js-_app-pages-browser_no-921807.css
+[WebServer]       static/chunks/vendors-_app-pages-browser_node_modules_dagrejs_dagre_dist_dagre_esm_js-_app-pages-browser_no-921807.js
+[WebServer]       static/chunks/app/page.js
+[WebServer] 
+[WebServer] webpack performance recommendations: 
+[WebServer] You can limit the size of your bundles by using import() or require.ensure to lazy load some parts of your application.
+[WebServer] For more info visit https://webpack.js.org/guides/code-splitting/
+[WebServer]  [33m[1m⚠[22m[39m asset size limit: The following asset(s) exceed the recommended size limit (488 KiB).
+[WebServer] This can impact web performance.
+[WebServer] Assets: 
+[WebServer]   static/chunks/main-app.js (5.74 MiB)
+[WebServer]   static/chunks/app/page.js (643 KiB)
+[WebServer]   static/chunks/validation.js (625 KiB)
+[WebServer]   static/chunks/vendors-_app-pages-browser_node_modules_dagrejs_dagre_dist_dagre_esm_js-_app-pages-browser_no-921807.js (2.07 MiB)
+[WebServer] 
+[WebServer] entrypoint size limit: The following entrypoint(s) combined asset size exceeds the recommended limit (488 KiB). This can impact web performance.
+[WebServer] Entrypoints:
+[WebServer]   main-app (5.79 MiB)
+[WebServer]       static/chunks/webpack.js
+[WebServer]       static/webpack/webpack.54c3603b61423563.hot-update.js
+[WebServer]       static/chunks/main-app.js
+[WebServer]   app/page (3.43 MiB)
+[WebServer]       static/chunks/validation.js
+[WebServer]       static/chunks/vendors.js
+[WebServer]       static/css/vendors-_app-pages-browser_node_modules_dagrejs_dagre_dist_dagre_esm_js-_app-pages-browser_no-921807.css
+[WebServer]       static/chunks/vendors-_app-pages-browser_node_modules_dagrejs_dagre_dist_dagre_esm_js-_app-pages-browser_no-921807.js
+[WebServer]       static/chunks/app/page.js
+[WebServer] 
+[WebServer] webpack performance recommendations: 
+[WebServer] You can limit the size of your bundles by using import() or require.ensure to lazy load some parts of your application.
+[WebServer] For more info visit https://webpack.js.org/guides/code-splitting/
+[WebServer]  [33m[1m⚠[22m[39m asset size limit: The following asset(s) exceed the recommended size limit (488 KiB).
+[WebServer] This can impact web performance.
+[WebServer] Assets: 
+[WebServer]   static/chunks/main-app.js (5.74 MiB)
+[WebServer]   static/chunks/app/page.js (643 KiB)
+[WebServer]   static/chunks/validation.js (625 KiB)
+[WebServer]   static/chunks/vendors-_app-pages-browser_node_modules_dagrejs_dagre_dist_dagre_esm_js-_app-pages-browser_no-921807.js (2.07 MiB)
+[WebServer] 
+[WebServer] entrypoint size limit: The following entrypoint(s) combined asset size exceeds the recommended limit (488 KiB). This can impact web performance.
+[WebServer] Entrypoints:
+[WebServer]   main-app (5.79 MiB)
+[WebServer]       static/chunks/webpack.js
+[WebServer]       static/webpack/webpack.f6e59225da8d8d0c.hot-update.js
+[WebServer]       static/chunks/main-app.js
+[WebServer]   app/page (3.43 MiB)
+[WebServer]       static/chunks/validation.js
+[WebServer]       static/chunks/vendors.js
+[WebServer]       static/css/vendors-_app-pages-browser_node_modules_dagrejs_dagre_dist_dagre_esm_js-_app-pages-browser_no-921807.css
+[WebServer]       static/chunks/vendors-_app-pages-browser_node_modules_dagrejs_dagre_dist_dagre_esm_js-_app-pages-browser_no-921807.js
+[WebServer]       static/chunks/app/page.js
+[WebServer] 
+[WebServer] webpack performance recommendations: 
+[WebServer] You can limit the size of your bundles by using import() or require.ensure to lazy load some parts of your application.
+[WebServer] For more info visit https://webpack.js.org/guides/code-splitting/
+····××F××F××F××F××F
