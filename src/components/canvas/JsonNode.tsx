@@ -89,7 +89,7 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
     const updatedJson = renameKeyAtPath(parsedJson, path, editKeyValue.trim())
     
     
-    setJsonText(JSON.stringify(updatedJson, null, 2), true)
+    setJsonText(JSON.stringify(updatedJson, null, 2))
     setIsEditingKey(false)
   }
   
@@ -120,7 +120,7 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
     
     const { parsedJson, setJsonText, selectPath } = useAppStore.getState()
     const updatedJson = addChildAtPath(parsedJson, path, keyName.trim(), childType)
-    setJsonText(JSON.stringify(updatedJson, null, 2), true)
+    setJsonText(JSON.stringify(updatedJson, null, 2))
     
     // Auto-select the new child
     const newPath = path === 'root' ? keyName.trim() : `${path}.${keyName.trim()}`
@@ -132,7 +132,7 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
     
     const { parsedJson, setJsonText, selectPath } = useAppStore.getState()
     const updatedJson = addArrayItem(parsedJson, path, itemType)
-    setJsonText(JSON.stringify(updatedJson, null, 2), true)
+    setJsonText(JSON.stringify(updatedJson, null, 2))
     
     // Get the new item's path
     const keys = path.split(/[.\[\]]/).filter(Boolean).filter(k => k !== 'root')
@@ -169,7 +169,7 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
     const parentPath = splitIndex > 0 ? path.substring(0, splitIndex) : null
     
     const updatedJson = deleteNodeAtPath(parsedJson, path)
-    setJsonText(JSON.stringify(updatedJson, null, 2), true)
+    setJsonText(JSON.stringify(updatedJson, null, 2))
     
     // Select parent after deletion (defer to let canvas re-render)
     if (parentPath) {
@@ -194,7 +194,7 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
       const clipboardData = JSON.parse(clipboardStr)
       const keyName = 'pasted_' + Date.now()
       const updatedJson = insertNodeAtPath(parsedJson, path, keyName, clipboardData.value)
-      setJsonText(JSON.stringify(updatedJson, null, 2), true)
+      setJsonText(JSON.stringify(updatedJson, null, 2))
       setTimeout(() => selectPath(path), 500)
     } catch (e) {
       console.error('Paste failed:', e)
@@ -295,7 +295,7 @@ export function JsonNode({ data, selected }: { data: JsonNodeData; selected: boo
     
     
     // Convert back to string and update editor
-    setJsonText(JSON.stringify(updatedJson, null, 2), true)
+    setJsonText(JSON.stringify(updatedJson, null, 2))
     
     setIsEditing(false)
   }

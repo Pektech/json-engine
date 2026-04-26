@@ -24,8 +24,8 @@ interface AppState {
   userOverrideSave: boolean
   gatewayToken: string | null
   currentFileHandle: FileSystemFileHandle | null
-  history: string[]  // JSON state snapshots for undo/redo
-  historyIndex: number  // Current position in history (-1 if empty)
+  history: string[]
+  historyIndex: number
 }
 
 interface AppActions {
@@ -42,18 +42,18 @@ interface AppActions {
   canSave: () => boolean
   setUserOverrideSave: (override: boolean) => void
   loadFile: (filePath: string, content: string) => Promise<void>
-  pushState: (jsonText: string) => void
-  undo: () => void
-  redo: () => void
-  clearHistory: () => void
   savePositions: () => void
   setGatewayToken: (token: string | null) => void
   clearGatewayToken: () => void
+  undo: () => void
+  redo: () => void
   setFileHandle: (handle: FileSystemFileHandle | null) => void
 }
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 const MAX_HISTORY = 50
+const HISTORY_DEBOUNCE_MS = 500  // 500ms after typing stops = 1 undo step
+let pendingHistoryPush: ReturnType<typeof setTimeout> | null = null
 
 export const useAppStore = create<AppState & AppActions>((set, get) => ({
   jsonText: '{}',
@@ -73,31 +73,26 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
     userOverrideSave: false,
     gatewayToken: null,
     currentFileHandle: null,
-    history: ['{}'],  // Start with initial empty JSON
+    history: ['{}'],  // Start with initial state
     historyIndex: 0,
 
-  setJsonText: (text: string, saveToHistory = false) => {
-    set((state) => {
-      if (saveToHistory) {
-        // Save current state to history BEFORE change
-        const newHistory = state.history.slice(0, state.historyIndex + 1)
-        newHistory.push(state.jsonText)
+  setJsonText: (text: string) => {
+    set({ jsonText: text, isDirty: true, validationErrors: [] })
+
+    // Clear existing debounce timer
+    if (pendingHistoryPush) clearTimeout(pendingHistoryPush)
+    
+    // Save to history after user stops typing (500ms debounce)
+    pendingHistoryPush = setTimeout(() => {
+      const state = get()
+      set((s) => {
+        const newHistory = s.history.slice(0, s.historyIndex + 1)
+        newHistory.push(text)
         if (newHistory.length > MAX_HISTORY) newHistory.shift()
-        
-        return {
-          jsonText: text,
-          isDirty: true,
-          validationErrors: [],
-          history: newHistory,
-          historyIndex: newHistory.length - 1
-        }
-      }
-      return {
-        jsonText: text,
-        isDirty: true,
-        validationErrors: []
-      }
-    })
+        return { history: newHistory, historyIndex: newHistory.length - 1 }
+      })
+      pendingHistoryPush = null
+    }, HISTORY_DEBOUNCE_MS)
 
     if (debounceTimer) {
       clearTimeout(debounceTimer)
@@ -243,17 +238,13 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   },
 
   loadFile: async (filePath: string, content: string) => {
-    // Initialize history with file content as first state
     set({
       currentFile: filePath,
       history: [content],
       historyIndex: 0,
       jsonText: content,
-      isDirty: false,
-      validationErrors: []
+      isDirty: false
     })
-    
-    // Note: jsonText already set above, no need to call setJsonText
 
     validationService.loadSchema({})
 
@@ -292,53 +283,32 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   clearGatewayToken: () => set({ gatewayToken: null }),
   setFileHandle: (handle: FileSystemFileHandle | null) => set({ currentFileHandle: handle }),
   
-  pushState: (jsonText: string) => {
-    set((state) => {
-      // Clear any redo states after new action
-      const newHistory = state.history.slice(0, state.historyIndex + 1)
-      
-      // Push new state
-      newHistory.push(jsonText)
-      
-      // Limit history size
-      if (newHistory.length > MAX_HISTORY) {
-        newHistory.shift()
-      }
-      
-      return {
-        history: newHistory,
-        historyIndex: newHistory.length - 1
-      }
-    })
-  },
-
   undo: () => {
     set((state) => {
       if (state.historyIndex > 0) {
+        if (pendingHistoryPush) clearTimeout(pendingHistoryPush)
         return {
           historyIndex: state.historyIndex - 1,
           jsonText: state.history[state.historyIndex - 1],
-          isDirty: true,  // Mark as dirty after undo
+          isDirty: true,
           validationErrors: []
         }
       }
       return {}
     })
   },
-
   redo: () => {
     set((state) => {
       if (state.historyIndex < state.history.length - 1) {
+        if (pendingHistoryPush) clearTimeout(pendingHistoryPush)
         return {
           historyIndex: state.historyIndex + 1,
           jsonText: state.history[state.historyIndex + 1],
-          isDirty: true,  // Mark as dirty after redo
+          isDirty: true,
           validationErrors: []
         }
       }
       return {}
     })
   },
-
-  clearHistory: () => set({ history: [], historyIndex: -1 }),
 }))
