@@ -149,7 +149,7 @@ export function EditorWorkspace() {
   const validationMarkers = parseError ? [{ message: parseError }] : []
 
   return (
-    <div className="flex flex-1 ml-64 h-screen">
+    <div className="flex flex-1 ml-64 min-h-screen">
       <div 
         className="relative flex w-full h-full"
         onMouseMove={handleDrag}

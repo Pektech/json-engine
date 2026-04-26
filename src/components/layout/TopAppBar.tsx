@@ -29,18 +29,6 @@ export function TopAppBar({ showHelp, setShowHelp, currentPath }: TopAppBarProps
             >
               Projects
             </a>
-            <a 
-              href="#" 
-              className="font-body text-sm tracking-tight text-zinc-500 hover:text-zinc-300 transition-colors"
-            >
-              Deploy
-            </a>
-            <a 
-              href="#" 
-              className="font-body text-sm tracking-tight text-zinc-500 hover:text-zinc-300 transition-colors"
-            >
-              History
-            </a>
           </nav>
         </div>
         <div className="flex items-center justify-center absolute left-1/2 -translate-x-1/2 max-w-md truncate">
