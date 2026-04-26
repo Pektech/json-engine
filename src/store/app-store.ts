@@ -24,6 +24,8 @@ interface AppState {
   userOverrideSave: boolean
   gatewayToken: string | null
   currentFileHandle: FileSystemFileHandle | null
+  history: string[]  // JSON state snapshots for undo/redo
+  historyIndex: number  // Current position in history (-1 if empty)
 }
 
 interface AppActions {
@@ -40,6 +42,10 @@ interface AppActions {
   canSave: () => boolean
   setUserOverrideSave: (override: boolean) => void
   loadFile: (filePath: string, content: string) => Promise<void>
+  pushState: (jsonText: string) => void
+  undo: () => void
+  redo: () => void
+  clearHistory: () => void
   savePositions: () => void
   setGatewayToken: (token: string | null) => void
   clearGatewayToken: () => void
@@ -47,6 +53,7 @@ interface AppActions {
 }
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
+const MAX_HISTORY = 50
 
 export const useAppStore = create<AppState & AppActions>((set, get) => ({
   jsonText: '{}',
@@ -66,9 +73,31 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
     userOverrideSave: false,
     gatewayToken: null,
     currentFileHandle: null,
+    history: [],
+    historyIndex: -1,
 
-  setJsonText: (text: string) => {
-    set({ jsonText: text, isDirty: true, validationErrors: [] })
+  setJsonText: (text: string, fromUndo = false) => {
+    set((state) => {
+      if (!fromUndo) {
+        // Save current state to history BEFORE change
+        const newHistory = state.history.slice(0, state.historyIndex + 1)
+        newHistory.push(state.jsonText)
+        if (newHistory.length > MAX_HISTORY) newHistory.shift()
+        
+        return {
+          jsonText: text,
+          isDirty: true,
+          validationErrors: [],
+          history: newHistory,
+          historyIndex: newHistory.length - 1
+        }
+      }
+      return {
+        jsonText: text,
+        isDirty: true,
+        validationErrors: []
+      }
+    })
 
     if (debounceTimer) {
       clearTimeout(debounceTimer)
@@ -214,7 +243,11 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   },
 
   loadFile: async (filePath: string, content: string) => {
-    set({ currentFile: filePath })
+    set({
+      currentFile: filePath,
+      history: [],
+      historyIndex: -1
+    })
 
     validationService.loadSchema({})
 
@@ -252,4 +285,52 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
   setGatewayToken: (token: string | null) => set({ gatewayToken: token }),
   clearGatewayToken: () => set({ gatewayToken: null }),
   setFileHandle: (handle: FileSystemFileHandle | null) => set({ currentFileHandle: handle }),
+  
+  pushState: (jsonText: string) => {
+    set((state) => {
+      // Clear any redo states after new action
+      const newHistory = state.history.slice(0, state.historyIndex + 1)
+      
+      // Push new state
+      newHistory.push(jsonText)
+      
+      // Limit history size
+      if (newHistory.length > MAX_HISTORY) {
+        newHistory.shift()
+      }
+      
+      return {
+        history: newHistory,
+        historyIndex: newHistory.length - 1
+      }
+    })
+  },
+
+  undo: () => {
+    set((state) => {
+      if (state.historyIndex > 0) {
+        return {
+          historyIndex: state.historyIndex - 1,
+          jsonText: state.history[state.historyIndex - 1],
+          validationErrors: []
+        }
+      }
+      return {}
+    })
+  },
+
+  redo: () => {
+    set((state) => {
+      if (state.historyIndex < state.history.length - 1) {
+        return {
+          historyIndex: state.historyIndex + 1,
+          jsonText: state.history[state.historyIndex + 1],
+          validationErrors: []
+        }
+      }
+      return {}
+    })
+  },
+
+  clearHistory: () => set({ history: [], historyIndex: -1 }),
 }))

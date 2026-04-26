@@ -98,6 +98,23 @@ export function useKeyboardShortcuts() {
     searchInput?.select();
   }, { preventDefault: true, enableOnFormTags: true, enableOnContentEditable: true });
 
+  // Ctrl+Z - Undo graph operation (only if canvas focused)
+  useHotkeys('ctrl+z', (e) => {
+    if (focusedArea !== 'editor') {
+      e.preventDefault();
+      useAppStore.getState().undo();
+    }
+    // If editor focused, let Monaco handle undo (text changes)
+  }, { enableOnFormTags: true, enableOnContentEditable: true });
+
+  // Ctrl+Shift+Z or Ctrl+Y - Redo graph operation
+  useHotkeys('ctrl+shift+z, ctrl+y', (e) => {
+    if (focusedArea !== 'editor') {
+      e.preventDefault();
+      useAppStore.getState().redo();
+    }
+  }, { enableOnFormTags: true, enableOnContentEditable: true });
+
   useHotkeys('ctrl+f', (event) => {
     // Only trigger canvas search if NOT in editor
     if (focusedArea !== 'editor') {
