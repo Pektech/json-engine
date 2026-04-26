@@ -1,0 +1,52 @@
+# T1: Lazy-load Monaco Editor via next/dynamic
+
+## Date: 2026-04-26
+
+## Changes Made
+- File: `src/components/editor/CodeEditor.tsx`
+- Removed: `import * as monaco from 'monaco-editor'` (static import pulling ~3-4MB)
+- Added: `import dynamic from 'next/dynamic'`
+- Kept: `import type { editor } from 'monaco-editor'` (type-only, zero bundle cost)
+- Kept: `import { useMonaco } from '@monaco-editor/react'` (just a React context hook)
+- Replaced: `import Editor, { useMonaco } from '@monaco-editor/react'` → dynamic import
+- Added: `EditorLoading` placeholder component
+- Added: `const Editor = dynamic(() => import('@monaco-editor/react'), { ssr: false, loading: () => <EditorLoading /> })`
+
+## Key Finding
+The `import * as monaco from 'monaco-editor'` was shadowed by the `useMonaco()` hook return value.
+All runtime `monaco` references (MarkerSeverity, editor.setModelMarkers, Range, languages.json)
+come from the hook, NOT the static import. The static import was dead code.
+
+## Verification
+### TypeScript Check
+```
+$ npx tsc --noEmit
+(no output - 0 errors)
+```
+
+### Build Check
+```
+$ npm run build
+  ▲ Next.js 14.2.5
+  Creating an optimized production build ...
+   ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/4) ...
+   Generating static pages (1/4) 
+   Generating static pages (2/4) 
+   Generating static pages (3/4) 
+   ✓ Generating static pages (4/4)
+   Finalizing page optimization ...
+   Collecting build traces ...
+  Route (app)                         Size     First Load JS
+  ┌ ○ /                               127 kb          214 kb
+  └ ○ /_not-found                     869 B          87.2 kb
+  + First Load JS shared by all       86.4 kb
+    ├ chunks/335-aa9bcabfdac27af0.js  84.5 kb
+    └ other shared chunks (total)     1.9 kb
+   ○  (Static)  prerendered as static content
+```
+
+### LSP Diagnostics
+No errors found on CodeEditor.tsx.

@@ -1,0 +1,127 @@
+# F3: Documentation Review — Evidence
+# Date: 2026-04-26
+# Task: Verify all MVP documentation files for placeholder tokens and substantive content
+
+## Method
+- Read each documentation file in full
+- Grep for `[TBD]`, `[placeholder]`, `[TODO]`, `[License information]`
+- Verified line counts with `wc -l`
+
+================================================================================
+FILE-BY-FILE RESULTS
+================================================================================
+
+## 1. LICENSE — PASS
+  Lines: 21 (meets >20 threshold)
+  Placeholders: NONE found
+  
+  [✅] Full MIT license text present (all 14 standard paragraphs)
+  [✅] Copyright line: "Copyright 2024-2026 JSON.engine contributors" (line 3)
+  [✅] No placeholder tokens found
+
+## 2. CHANGELOG.md — PASS
+  Lines: 42 (meets >20 threshold)
+  Placeholders: NONE found
+  
+  [✅] `[Unreleased]` section present (line 8)
+  [✅] Recent fixes documented in [Unreleased]:
+       - "Rebuild graph on undo/redo and clear timer race condition"
+       - "Guard cursor position on model replacement only"
+       - "Scope-aware path resolution for duplicate key names"
+       - "Exact line matching for duplicate key names"
+       - "Skip selection for lines with only closing braces"
+  [✅] UI cleanup noted: "Remove unused nav items and fix header overlap"
+  [✅] Features section lists: beta, visual canvas, Monaco, bidirectional sync,
+       schema validation, FSA integration, keyboard shortcuts, dark theme,
+       E2E tests, security audit
+  [✅] Security section complete
+  [✅] Standard Keep a Changelog / SemVer format followed
+  [⚠️] Has `[1.0.0-beta.1] - YYYY-MM-DD` — date not yet filled in (expected for unreleased)
+  [⚠️] Compare links use `github.com/username/json-engine` — generic placeholder URLs
+
+## 3. README.md — FAIL
+  Lines: 113 (meets >20 threshold)
+  Placeholders: **1 found**
+  
+  Expected checks:
+  [✅] Features updated — includes undo, split view, dark theme, copy/paste (lines 14-16)
+  [✅] Keyboard shortcuts table complete — 8 shortcuts listed (lines 78-88)
+  [✅] Getting Started section present (lines 54-71)
+  [✅] Browser Support section present (lines 90-105)
+  
+  FAILURES:
+  [❌] LINE 113: `[License information]` — bare placeholder token
+       Expected: Link to LICENSE file or reference "MIT License — see LICENSE file"
+  [⚠️] LINE 75: "*Screenshots will be added here...*" — known incomplete placeholder
+  [⚠️] LINE 28: `git clone <repository-url>` — generic URL placeholder
+
+  The [License information] token is a FAIL because it matches the explicit
+  forbidden token list: "[License information]"
+
+## 4. ARCHITECTURE.md — PASS
+  Lines: 306 (exceeds >20 threshold)
+  Placeholders: NONE found
+  
+  [✅] Component hierarchy present (lines 48-79) — full tree with node types
+  [✅] State management section present (lines 82-128) — Zustand store interface,
+       undo/redo system documented
+  [✅] Data flow section present (lines 130-202) — 4 flows documented:
+       editor-to-canvas, canvas-to-editor, graph mutation, validation
+  [✅] Key design decisions documented (Zustand, React Flow, Monaco, AJV)
+  [✅] File dependencies section present
+  [✅] Technology stack table present
+  [✅] Feature extension guidelines present
+
+## 5. DEVELOPER.md — PASS
+  Lines: 328 (exceeds >20 threshold)
+  Placeholders: NONE found
+  
+  [✅] Setup section present (lines 5-29) — prerequisites, installation, checklist
+  [✅] File structure section present (lines 33-88) — detailed tree with descriptions
+  [✅] Testing section present (lines 130-184) — unit tests (Jest, 76 passing), E2E tests
+       (Playwright), adding new tests guide
+  [✅] Debugging section present (lines 90-128) — port conflicts, TypeScript errors,
+       React Flow issues, Monaco loading issues, general tips
+  [✅] Adding Features section (lines 187-270) — node types, store state, pages, shortcuts
+  [✅] Code patterns section (lines 283-322) — store usage, file ops, graph ops
+  [✅] Security notes present
+
+================================================================================
+GREP RESULTS: Placeholder Tokens
+================================================================================
+
+Pattern: \[TBD\]|\[placeholder\]|\[TODO\]|\[License information\]
+
+Results in documentation files:
+  README.md line 113:  [License information]
+
+(One match in playwright-report/index.html line 58 — that is auto-generated HTML,
+not a documentation file, excluded from review.)
+
+================================================================================
+LINE COUNT VERIFICATION
+================================================================================
+
+  LICENSE:         21 lines ✅ (>20)
+  CHANGELOG.md:    42 lines ✅ (>20)
+  README.md:      113 lines ✅ (>20)
+  ARCHITECTURE.md: 306 lines ✅ (>20)
+  DEVELOPER.md:    328 lines ✅ (>20)
+  Total:           808 lines
+
+================================================================================
+SUMMARY
+================================================================================
+
+  LICENSE:         PASS — MIT license, copyright line present
+  CHANGELOG.md:    PASS — Unreleased section with all recent fixes
+  README.md:       FAIL — Contains `[License information]` placeholder
+  ARCHITECTURE.md: PASS — All required sections present and substantive
+  DEVELOPER.md:    PASS — All required sections present and substantive
+
+  Overall: FAIL (1 of 5 files)
+
+  Action Required:
+    README.md line 113: Replace `[License information]` with actual license
+    reference. Recommended: "MIT License — see LICENSE file for details."
+    (Or hyperlink to the LICENSE file if publishing as Markdown.)
