@@ -12,34 +12,57 @@ function getLinePosition(text: string, index: number): LineLocation {
 }
 
 function findLocationInText(jsonText: string, path: string): LineLocation {
-  if (path === 'root') {
+  if (path === 'root') return { line: 1, column: 1 }
+  
+  const segments = path.split(/[.\[\]]/).filter(Boolean)
+  
+  // Skip "root" since it's not a real key in the JSON
+  const keysToNavigate = segments[0] === 'root' ? segments.slice(1) : segments
+  
+  if (keysToNavigate.length === 0) {
     return { line: 1, column: 1 }
   }
   
-  const lastPart = path.split(/[.\[\]]/).filter(Boolean).pop()
+  let searchStart = 0
   
-  if (!lastPart) {
-    return { line: 1, column: 1 }
+  for (let i = 0; i < keysToNavigate.length - 1; i++) {
+    const key = keysToNavigate[i]
+    const isArrIndex = /^\d+$/.test(key)
+    const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const pattern = isArrIndex 
+      ? new RegExp(`\\[${escapedKey}\\]\\s*:`)
+      : new RegExp(`"${escapedKey}"\\s*:`)
+    
+    const textToSearch = jsonText.slice(searchStart)
+    const match = textToSearch.match(pattern)
+    
+    if (!match || match.index === undefined) break
+    
+    searchStart += match.index + match[0].length
   }
   
-  const isArrayIndex = /^\d+$/.test(lastPart)
+  const targetKey = keysToNavigate[keysToNavigate.length - 1]
+  const isArrIndex = /^\d+$/.test(targetKey)
+  const escapedKey = targetKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const pattern = isArrIndex 
+    ? new RegExp(`\\[${escapedKey}\\]\\s*:`)
+    : new RegExp(`"${escapedKey}"\\s*:`)
   
-  if (isArrayIndex) {
-    const arrayPattern = new RegExp(`\\[${lastPart}\\]\\s*:`)
-    const match = jsonText.match(arrayPattern)
-    if (match && match.index !== undefined) {
-      return getLinePosition(jsonText, match.index)
-    }
-  } else {
-    const objectPattern = new RegExp(`"${lastPart}"\\s*:`, 'm')
-    const match = jsonText.match(objectPattern)
-    if (match && match.index !== undefined) {
-      return getLinePosition(jsonText, match.index)
-    }
+  const textToSearch = jsonText.slice(searchStart)
+  const match = textToSearch.match(pattern)
+  
+  if (match && match.index !== undefined) {
+    return getLinePosition(jsonText, searchStart + match.index)
+  }
+  
+  const fallbackMatch = jsonText.match(pattern)
+  if (fallbackMatch && fallbackMatch.index !== undefined) {
+    return getLinePosition(jsonText, fallbackMatch.index)
   }
   
   return { line: 1, column: 1 }
 }
+
 
 export function parseJsonWithLocation(jsonText: string): { 
   data: any
