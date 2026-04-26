@@ -111,7 +111,7 @@ export function lineToPath(jsonText: string, line: number): string | null {
   // Check if this line is just a closing brace with no actual key/value
   // (cursor on } or ] shouldn't trigger path selection)
   const lineContent = jsonText.split('\n')[line - 1] || ''
-  if (lineContent.trim() === '' || /^[\s]*[\}\]]/.test(lineContent.trim())) {
+  if (lineContent.trim() === '' || /^[\s]*[\}\]\{\[]/.test(lineContent.trim())) {
     // Line has only closing brace(s) — no real path to select
     return null
   }
