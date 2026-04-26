@@ -204,9 +204,12 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       const location = pathToLine(value, selectedPath)
       if (!location || !location.line || !location.column) return
 
-      // Scroll to show the selected line, but don't move cursor
-      // (cursor position should only change from user typing/clicking)
+      // Scroll to show the selected line and move cursor there (needed after undo/redo model replacement)
       editorRef.current.revealLinesInCenter(location.line, location.line)
+
+      // Move cursor to the correct position (needed after undo/redo model replacement)
+      editorRef.current.setPosition({ lineNumber: location.line, column: 1 })
+      editorRef.current.focus()
 
       const decorations = [
         {
