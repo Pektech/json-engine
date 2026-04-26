@@ -42,6 +42,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
   ) {
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
   const decorationIdsRef = useRef<string[]>([])
+    const prevValueRef = useRef<string>(value)
   const monaco = useMonaco()
   const validationErrors = useAppStore(state => state.validationErrors)
   const { setFocusedArea } = useFocusContext()
@@ -204,9 +205,17 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       const location = pathToLine(value, selectedPath)
       if (!location || !location.line || !location.column) return
 
-      // Scroll to show the selected line, but don't move cursor
-      // (cursor position should only change from user typing/clicking)
+      const valueChanged = value !== prevValueRef.current
+      prevValueRef.current = value
+
+      // Always scroll to show the selected line  
       editorRef.current.revealLinesInCenter(location.line, location.line)
+
+      // Only move cursor when model was replaced
+      if (valueChanged) {
+        editorRef.current.setPosition({ lineNumber: location.line, column: 1 })
+        editorRef.current.focus()
+      }
 
       const decorations = [
         {
