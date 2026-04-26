@@ -130,6 +130,10 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
           const position = editor.getPosition()
           if (!position || !onCursorPositionChange) return
           
+          // Don't update path if text is selected (user is selecting, not navigating)
+          const selection = editor.getSelection()
+          if (selection && !selection.isEmpty()) return
+          
           // Get full JSON text directly from editor model
           const fullJsonText = getFullJsonText()
           
