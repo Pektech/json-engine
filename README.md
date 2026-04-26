@@ -23,14 +23,25 @@ A visual JSON editor for OpenClaw configuration management. Edit complex JSON co
 
 ## Installation
 
+### Clone from GitHub
+
 ```bash
-# Clone the repository
-git clone <repository-url>
+git clone https://github.com/[user]/json-engine.git
 cd json-engine
-
-# Install dependencies
 npm install
+npm run dev
+```
 
+### Docker
+
+```bash
+docker build -t json-engine .
+docker run -p 3030:3030 json-engine
+```
+
+### Development Setup
+
+```bash
 # Install Playwright browsers (for E2E tests)
 npx playwright install
 ```

@@ -1,7 +1,29 @@
 {
   "name": "json-engine",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0-beta.1",
+  "homepage": "https://github.com/[user]/json-engine#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/[user]/json-engine.git"
+  },
+  "bugs": {
+    "url": "https://github.com/[user]/json-engine/issues"
+  },
+  "license": "MIT",
+  "files": [
+    "src/",
+    "public/",
+    "e2e/",
+    "README.md",
+    "CHANGELOG.md",
+    "ARCHITECTURE.md",
+    "DEVELOPER.md",
+    "LICENSE",
+    "package.json",
+    "next.config.js",
+    "tsconfig.json",
+    "postcss.config.mjs"
+  ],
   "scripts": {
     "dev": "next dev -p 3030",
     "build": "next build",
