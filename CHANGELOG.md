@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Rebuild graph on undo/redo and clear timer race condition
+- Guard cursor position on model replacement only
+- Scope-aware path resolution for duplicate key names
+- Exact line matching for duplicate key names
+- Skip selection for lines with only closing braces
+
+### Changed
+- Remove unused nav items and fix header overlap
+
 ### Added
 - Initial beta release
 - Visual node canvas with React Flow
