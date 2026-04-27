@@ -56,35 +56,35 @@ User wants to distribute JSON.engine as a developer tool (npm publish + git clon
 Make JSON.engine ready for npm publish + git clone distribution with <2 MB client bundle.
 
 ### Concrete Deliverables
-- [ ] Monaco Editor lazy-loaded via `next/dynamic` (CodeEditor.tsx)
-- [ ] DAGre chunk optimization in next.config.js
-- [ ] `package.json` v1.0.0-beta.1, distribution metadata added
-- [ ] `next.config.js` `output: 'standalone'` added
-- [ ] `.github/workflows/ci.yml` build + test pipeline
-- [ ] `Dockerfile` + `.dockerignore` for containerized distribution
-- [ ] npm package file list (via `files` or `.npmignore`)
-- [ ] Bundle analyzer verification
+- [x] Monaco Editor lazy-loaded via `next/dynamic` (CodeEditor.tsx)
+- [x] DAGre chunk optimization in next.config.js
+- [x] `package.json` v1.0.0-beta.1, distribution metadata added
+- [x] `next.config.js` `output: 'standalone'` added
+- [x] `.github/workflows/ci.yml` build + test pipeline
+- [x] `Dockerfile` + `.dockerignore` for containerized distribution
+- [x] npm package file list (via `files` array in package.json)
+- [x] Bundle analyzer verification
 
 ### Definition of Done
-- [ ] Monaco lazy-loads: import removed from client-side code bundle
-- [ ] Client bundle < 2 MB (verify with `npm run build`)
-- [ ] `npx tsc --noEmit` passes
-- [ ] `npm run build` passes
-- [ ] CI pipeline passes (simulated locally: `npm run build`)
-- [ ] Dockerfile builds successfully
-- [ ] All changes committed with proper messages
+- [x] Monaco lazy-loads: import removed from client-side code bundle
+- [x] Client bundle < 2 MB (verify with `npm run build`)
+- [x] `npx tsc --noEmit` passes
+- [x] `npm run build` passes
+- [x] CI pipeline passes (simulated locally: `npm run build`)
+- [x] Dockerfile builds successfully
+- [x] All changes committed with proper messages
 
 ### Must Have
-- Monaco Editor loaded dynamically with `next/dynamic` + loading placeholder
-- `output: 'standalone'` in next.config.js for self-hosted distribution
-- package.json: version 1.0.0-beta.1, removed `private: true`, added metadata
-- CI pipeline: build + type check on push + PR
+- [x] Monaco Editor loaded dynamically with `next/dynamic` + loading placeholder
+- [x] `output: 'standalone'` in next.config.js for self-hosted distribution
+- [x] package.json: version 1.0.0-beta.1, removed `private: true`, added metadata
+- [x] CI pipeline: build + type check on push + PR
 
 ### Must NOT Have (Guardrails)
-- DO NOT modify src/store or src/lib business logic
-- DO NOT add new dependencies
-- DO NOT change existing E2E test files
-- DO NOT modify production behavior (only loading pattern changes)
+- [x] DO NOT modify src/store or src/lib business logic
+- [x] DO NOT add new dependencies
+- [x] DO NOT change existing E2E test files
+- [x] DO NOT modify production behavior (only loading pattern changes)
 
 ---
 
@@ -356,7 +356,7 @@ Wave FINAL (Documentation + Cleanup):
 
 ---
 
-- [ ] 6. Add npm package file list (.npmignore alternative)
+- [x] 6. Add npm package file list (.npmignore alternative)
 
   **What to do**:
   - If using `"files"` in package.json (from T3), verify it's correct
