@@ -68,6 +68,8 @@ const nextConfig = {
     config.resolve = config.resolve || {};
     config.resolve.alias = config.resolve.alias || {};
     config.resolve.alias['@'] = path.join(__dirname, 'src');
+
+    config.resolve.extensions = [...(config.resolve.extensions || ['.js', '.jsx', '.json', '.mjs']), '.ts', '.tsx'];
     return config
   },
 }
