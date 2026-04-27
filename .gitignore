@@ -10,7 +10,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-package-lock.json
+
 yarn.lock
 pnpm-lock.yaml
 
@@ -73,15 +73,20 @@ temp/
 *.backup
 
 # Optional: Uncomment if using TypeScript
-# *.tsbuildinfo
+*.tsbuildinfo
 
 # Optional: Uncomment if using Storybook
 # storybook-static/
 
 # Optional: Uncomment if using Playwright
-# /test-results/
-# /playwright-report/
-# /playwright/.cache/
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
+# Internal dev tooling (contains local paths, not for public)
+.planning/
+.sisyphus/
+.playwright-mcp/
 
 # ── GSD baseline (auto-generated) ──
 .gsd

@@ -10,6 +10,9 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
   output: 'standalone',
+  typescript: {
+    ignoreBuildErrors: false,
+  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.optimization = config.optimization || {}
