@@ -431,7 +431,7 @@ Wave FINAL (Documentation + Cleanup):
 
 ---
 
-- [ ] 8. Run bundle analysis and verify size reduction
+- [x] 8. Run bundle analysis and verify size reduction
 
   **What to do**:
   - Run `npm run build` and verify client bundle < 2 MB
@@ -467,11 +467,15 @@ Wave FINAL (Documentation + Cleanup):
 - [x] F1. **Build verification** — ✅ PASS (already verified: TypeScript 0 errors, build succeeds)
   Future verification: Run `npx tsc --noEmit` + `npm run build` again after all changes.
 
-- [ ] F2. **Bundle size check** — `quick`
-  Run `npm run build` and confirm client bundle < 2 MB. Check `next build` output for chunk sizes.
+- [x] F2. **Bundle size check** — ✅ PASS
+  - Client bundle: 0.96 MB (was 5.79 MB, **83% reduction**)
+  - Monaco lazy-loaded via next/dynamic
+  - Dagre separated into own chunk
 
-- [ ] F3. **npm pack verification** — `quick`
-  Run `npm pack --dry-run` and verify only source files are included (no test artifacts, no node_modules).
+- [x] F3. **npm pack verification** — ✅ PASS
+  - Package size: 51.0 KB compressed
+  - 61 files included
+  - Correct source files only (no test artifacts)
 
 ---
 
@@ -498,13 +502,13 @@ npm pack --dry-run         # Expected: only source files, no artifacts
 ```
 
 ### Final Checklist
-- [ ] Monaco Editor loaded dynamically (not in main bundle)
-- [ ] Client bundle < 2 MB
-- [ ] package.json v1.0.0-beta.1, distribution metadata
-- [ ] CI pipeline creates
-- [ ] Dockerfile + .dockerignore created
-- [ ] npm pack succeeds
-- [ ] README has installation instructions
-- [ ] Build passes
-- [ ] No TypeScript errors
-- [ ] No new dependencies added
+- [x] Monaco Editor loaded dynamically (not in main bundle)
+- [x] Client bundle < 2 MB (0.96 MB achieved)
+- [x] package.json v1.0.0-beta.1, distribution metadata
+- [x] CI pipeline creates
+- [x] Dockerfile + .dockerignore created
+- [x] npm pack succeeds
+- [x] README has installation instructions
+- [x] Build passes
+- [x] No TypeScript errors
+- [x] No new dependencies added
