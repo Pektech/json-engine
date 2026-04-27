@@ -1,3 +1,4 @@
+const path = require('path');
 /** @type {import('next').NextConfig} */
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
@@ -63,6 +64,10 @@ const nextConfig = {
       config.performance.maxEntrypointSize = 500000; // 500KB for development
     }
     
+    
+    config.resolve = config.resolve || {};
+    config.resolve.alias = config.resolve.alias || {};
+    config.resolve.alias['@'] = path.join(__dirname, 'src');
     return config
   },
 }
