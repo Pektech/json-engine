@@ -10,7 +10,7 @@ const appPath = path.join(__dirname, '..');
 
 try {
   console.log('📦 Installing dependencies...');
-  execSync('npm install --production', { cwd: appPath, stdio: 'inherit' });
+  execSync('npm install', { cwd: appPath, stdio: 'inherit' });
   
   console.log('🔨 Building standalone server...');
   execSync('npm run build', { cwd: appPath, stdio: 'inherit' });
