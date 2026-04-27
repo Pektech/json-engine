@@ -1,13 +1,13 @@
 {
   "name": "json-engine",
   "version": "1.0.0-beta.1",
-  "homepage": "https://github.com/[user]/json-engine#readme",
+  "homepage": "https://github.com/Pektech/json-engine#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/[user]/json-engine.git"
+    "url": "git+https://github.com/Pektech/json-engine.git"
   },
   "bugs": {
-    "url": "https://github.com/[user]/json-engine/issues"
+    "url": "https://github.com/Pektech/json-engine/issues"
   },
   "license": "MIT",
   "files": [
