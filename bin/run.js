@@ -5,36 +5,28 @@ const path = require('path');
 const fs = require('fs');
 
 const packageDir = path.resolve(__dirname, '..');
-process.chdir(packageDir);
+const standaloneDir = path.join(packageDir, '.next', 'standalone');
 
 console.log('🚀 JSON.engine starting on port 3030...');
 console.log('⚠️  Requires Chrome/Edge (File System Access API)');
-console.log('📁 Working directory:', packageDir);
 
 try {
-  const tsConfig = path.join(packageDir, 'tsconfig.json');
-  if (!fs.existsSync(tsConfig)) {
-    console.error('❌ tsconfig.json not found at:', tsConfig);
+  if (!fs.existsSync(standaloneDir)) {
+    console.error('❌ Pre-built standalone server not found at:', standaloneDir);
+    console.error('   This package may be corrupted. Try reinstalling.');
     process.exit(1);
   }
-  console.log('✅ Found tsconfig.json');
 
-  console.log('📦 Installing dependencies...');
-  execSync('npm install', { 
-    cwd: packageDir, 
-    stdio: 'inherit',
-  });
-  
-  console.log('🔨 Building standalone server...');
-  execSync('node node_modules/.bin/next build', { 
-    cwd: packageDir, 
-    stdio: 'inherit',
-  });
-  
+  console.log('✅ Found pre-built server');
   console.log('▶️  Starting server...');
-  execSync('node node_modules/.bin/next start --port 3030', { 
-    cwd: packageDir, 
+
+  execSync('node server.js', {
+    cwd: standaloneDir,
     stdio: 'inherit',
+    env: {
+      ...process.env,
+      PORT: '3030',
+    },
   });
 } catch (err) {
   console.error('❌ Failed to start JSON.engine:', err.message);
