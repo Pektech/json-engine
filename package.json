@@ -1,6 +1,6 @@
 {
   "name": "@pekton/json-engine",
-  "version": "1.0.0-beta.7",
+  "version": "1.0.0-beta.8",
   "homepage": "https://github.com/Pektech/json-engine#readme",
   "repository": {
     "type": "git",
@@ -24,7 +24,7 @@
     "tsconfig.json",
     "postcss.config.js",
     "tailwind.config.ts",
-    ".swcrc"
+    "bin/"
   ],
   "scripts": {
     "dev": "next dev -p 3030",
