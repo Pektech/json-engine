@@ -21,6 +21,14 @@ A visual JSON editor for OpenClaw configuration management. Edit complex JSON co
 - npm 10+
 - Modern browser with File System Access API support (Chrome, Edge)
 
+## Quickest Start (No Install Required)
+The fastest way to run JSON.engine is using `npx`, which downloads and runs the pre-built server instantly:
+
+```bash
+npx @pekton/json-engine
+# Server will start at http://localhost:3030
+```
+
 ## Installation
 
 ### Clone from GitHub
