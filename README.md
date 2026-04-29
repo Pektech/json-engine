@@ -76,7 +76,7 @@ New to JSON.engine? Here is a quick guide to get you editing in under a minute.
 
 ### For Non-Developers
 
-1. **Open the app**: Visit the hosted URL or open the local development server
+1. **Open the app**: just run npx @pekton/json-engine
 2. **Open a file**: Press `Ctrl+O` and select any JSON file from your computer
 3. **Edit visually**: Click on nodes in the canvas to select and edit values
 4. **Edit in code**: Use the code editor on the left for direct text editing
