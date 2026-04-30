@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: ['**']
   pull_request:
     branches: [main]
 
@@ -24,11 +24,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Type check
-        run: npx tsc --noEmit
-
       - name: Build
         run: npm run build
 
-      - name: Run tests
-        run: npm test
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Run tests with coverage
+        run: npm test -- --coverage --runInBand
