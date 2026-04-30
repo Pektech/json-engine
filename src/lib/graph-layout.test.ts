@@ -63,5 +63,17 @@ describe('graph-layout', () => {
 
       expect(result).toEqual({ x: 90, y: 30, zoom: 1 })
     })
+
+    it('falls back to unit zoom when calculated width is not positive', () => {
+      const result = fitViewBounds([node('a', 0, 0, -250, 60)])
+
+      expect(result).toEqual({ x: -125, y: 30, zoom: 1 })
+    })
+
+    it('falls back to unit zoom when calculated height is not positive', () => {
+      const result = fitViewBounds([node('a', 0, 0, 180, -250)])
+
+      expect(result).toEqual({ x: 90, y: -125, zoom: 1 })
+    })
   })
 })
