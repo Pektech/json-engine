@@ -313,18 +313,18 @@ describe('FileManager', () => {
     })
 
     it('adds json extension when missing', () => {
-      let anchor: HTMLAnchorElement | null = null
+      const anchors: HTMLAnchorElement[] = []
       jest.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
         const element = originalCreateElement(tagName)
         if (tagName === 'a') {
-          anchor = element as HTMLAnchorElement
+          anchors.push(element as HTMLAnchorElement)
           jest.spyOn(element, 'click').mockImplementation(() => undefined)
         }
         return element
       })
 
       expect((fileManager as any).saveFileWithFallback('data', '{}')).toBe(true)
-      expect(anchor?.download).toBe('data.json')
+      expect(anchors[0].download).toBe('data.json')
     })
 
     it('returns unknown error when fallback save throws', () => {
