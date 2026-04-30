@@ -58,7 +58,9 @@ export function fitViewBounds(nodes: CanvasNode[]): { x: number; y: number; zoom
   const availableHeight = height + padding * 2
   
   const zoom = Math.min(
+    /* istanbul ignore next -- padding keeps availableWidth positive for every real bounds result. */
     availableWidth > 0 ? 800 / availableWidth : 1,
+    /* istanbul ignore next -- padding keeps availableHeight positive for every real bounds result. */
     availableHeight > 0 ? 600 / availableHeight : 1,
     1
   )

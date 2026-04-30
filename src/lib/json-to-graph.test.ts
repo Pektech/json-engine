@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { getJsonType, getLabel, jsonToGraph, countNodes } from './json-to-graph'
+import { getJsonType, getLabel, jsonToGraph, layoutGraph, countNodes } from './json-to-graph'
 import type { GraphData } from '@/types/canvas'
 
 describe('json-to-graph', () => {
@@ -39,11 +39,20 @@ describe('json-to-graph', () => {
       expect(getJsonType(true)).toBe('boolean')
       expect(getJsonType(false)).toBe('boolean')
     })
+
+    it('returns null type for unsupported values', () => {
+      expect(getJsonType(undefined)).toBe('null')
+      expect(getJsonType(Symbol('x'))).toBe('null')
+    })
   })
 
   describe('getLabel', () => {
     it('returns root for root path', () => {
       expect(getLabel('root')).toBe('root')
+    })
+
+    it('returns root for empty path', () => {
+      expect(getLabel('')).toBe('root')
     })
 
     it('returns property name for nested object path', () => {
@@ -195,6 +204,18 @@ describe('json-to-graph', () => {
 
     it('returns correct count for arrays', () => {
       expect(countNodes({ arr: [1, 2, 3] })).toBe(5)
+    })
+  })
+
+  describe('layoutGraph', () => {
+    it('positions nodes using graph edges without mutating data fields', () => {
+      const graph = jsonToGraph({ a: 1, b: { c: true } })
+      const layouted = layoutGraph(graph.nodes, graph.edges)
+
+      expect(layouted).toHaveLength(graph.nodes.length)
+      expect(layouted[0].data).toEqual(graph.nodes[0].data)
+      expect(layouted.every(node => Number.isFinite(node.position.x))).toBe(true)
+      expect(layouted.every(node => Number.isFinite(node.position.y))).toBe(true)
     })
   })
 })

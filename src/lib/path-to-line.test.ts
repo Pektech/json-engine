@@ -47,6 +47,13 @@ describe('path-to-line', () => {
       expect(result.locations.has('root.arr[0]')).toBe(true)
       expect(result.locations.has('root.arr[1]')).toBe(true)
     })
+
+    it('handles nested arrays without object keys between indices', () => {
+      const jsonText = '{"arr": [[1]]}'
+      const result = parseJsonWithLocation(jsonText)
+
+      expect(result.locations.has('root.arr[0][0]')).toBe(true)
+    })
   })
 
   describe('pathToLine', () => {
@@ -86,6 +93,7 @@ describe('path-to-line', () => {
       expect(result).not.toBeNull()
       expect(result?.line).toBeGreaterThan(0)
     })
+
   })
 
   describe('lineToPath', () => {
@@ -139,6 +147,20 @@ describe('path-to-line', () => {
       const result = findPathByKeyLabel(jsonText, 'b', 3)
       
       expect(result).toBe('root.b')
+    })
+
+    it('prefers deepest duplicate key match near the requested line', () => {
+      const jsonText = '{\n  "name": "root",\n  "user": {\n    "name": "nested"\n  }\n}'
+      const result = findPathByKeyLabel(jsonText, 'name', 4)
+
+      expect(result).toBe('root.user.name')
+    })
+
+    it('keeps first match when duplicate key scores tie', () => {
+      const jsonText = '{"a":{"name":1},"b":{"name":2}}'
+      const result = findPathByKeyLabel(jsonText, 'name', 1)
+
+      expect(result).toBe('root.a.name')
     })
 
     it('returns null for non-existent key', () => {
