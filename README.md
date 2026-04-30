@@ -91,10 +91,9 @@ New to JSON.engine? Here is a quick guide to get you editing in under a minute.
 
 ## Screenshots
 
-![Screenshot from 2026-04-29 19-41-41](../../../../home/richard-leddy/Pictures/Screenshots/Screenshot from 2026-04-29 19-41-41.png)
-![Screenshot from 2026-04-29 19-40-56](../../../../home/richard-leddy/Pictures/Screenshots/Screenshot from 2026-04-29 19-40-56.png)
-![Screenshot from 2026-04-29 19-40-29](../../../../home/richard-leddy/Pictures/Screenshots/Screenshot from 2026-04-29 19-40-29.png)
-
+![Edit View](img/Screenshot_edit.png)
+![Split View](img/Screenshot_split.png)
+![Text View](img/Screenshot_text.png)
 
 ## Keyboard Shortcuts
 
