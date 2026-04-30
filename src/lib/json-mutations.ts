@@ -3,7 +3,10 @@
  * All functions deep-clone the input before mutating — the original object is never changed.
  */
 
+import { getValueAtJsonPath, parseJsonPath } from '@/lib/json-path'
+
 export type JsonValueType = 'string' | 'number' | 'boolean' | 'object' | 'array'
+type JsonContainer = Record<string, unknown> | unknown[]
 
 const DEFAULT_VALUES: Record<JsonValueType, unknown> = {
   string: '',
@@ -17,51 +20,64 @@ function clone<T = unknown>(obj: T): T {
   return JSON.parse(JSON.stringify(obj)) as T
 }
 
-function parsePath(path: string): string[] {
-  return path.split(/[.\[\]]/).filter(Boolean).filter(k => k !== 'root')
+function getContainerAtPath(root: unknown, path: string): unknown | null {
+  let current = root
+
+  for (const key of parseJsonPath(path)) {
+    if (current === null || current === undefined) return null
+    if ((current as Record<string, unknown>)[key] === undefined) return null
+    current = (current as Record<string, unknown>)[key]
+  }
+
+  return current
+}
+
+function getParentAtPath(root: unknown, keys: string[]): JsonContainer | null {
+  let parent = root
+
+  for (const key of keys.slice(0, -1)) {
+    if (parent === null || parent === undefined) return null
+    if ((parent as Record<string, unknown>)[key] === undefined) return null
+    parent = (parent as Record<string, unknown>)[key]
+  }
+
+  return parent as JsonContainer
 }
 
 export function setValueAtPath(obj: unknown, path: string, value: unknown): unknown {
   const result = clone(obj)
-  const keys = parsePath(path)
+  const keys = parseJsonPath(path)
 
   if (keys.length === 0) {
     return value
   }
 
-  let current = result as Record<string, unknown>
-  for (let i = 0; i < keys.length - 1; i++) {
-    const key = keys[i]
-    if (current[key] === undefined) {
-      console.error('Path not found:', path, 'at key:', key, 'in', Object.keys(current))
-      return obj
-    }
-    current = current[key] as Record<string, unknown>
+  const current = getParentAtPath(result, keys)
+  if (!current) {
+    console.error('Path not found:', path)
+    return obj
   }
 
   const lastKey = keys[keys.length - 1]
-  current[lastKey] = value
+  const currentRecord = current as Record<string, unknown>
+  currentRecord[lastKey] = value
 
   return result
 }
 
 export function renameKeyAtPath(obj: unknown, fullPath: string, newKey: string): unknown {
   const result = clone(obj)
-  const keys = parsePath(fullPath)
+  const keys = parseJsonPath(fullPath)
 
   if (keys.length === 0) {
     console.error('Cannot rename root')
     return obj
   }
 
-  let parent = result as Record<string, unknown>
-  for (let i = 0; i < keys.length - 1; i++) {
-    const key = keys[i]
-    if (parent[key] === undefined) {
-      console.error('Parent path not found:', keys.slice(0, i + 1).join('.'))
-      return obj
-    }
-    parent = parent[key] as Record<string, unknown>
+  const parent = getParentAtPath(result, keys) as Record<string, unknown> | null
+  if (!parent) {
+    console.error('Parent path not found:', keys.slice(0, -1).join('.'))
+    return obj
   }
 
   const oldKey = keys[keys.length - 1]
@@ -99,18 +115,14 @@ export function rebuildWithNewParent(
   }
 
   const result = clone(obj)
-  let current = result as Record<string, unknown>
-
-  for (let i = 0; i < pathKeys.length - 1; i++) {
-    const key = pathKeys[i]
-    if (current[key] === undefined) {
-      return obj
-    }
-    current = current[key] as Record<string, unknown>
+  const current = getParentAtPath(result, pathKeys)
+  if (!current) {
+    return obj
   }
 
   const lastKey = pathKeys[pathKeys.length - 1]
-  current[lastKey] = newParent
+  const currentRecord = current as Record<string, unknown>
+  currentRecord[lastKey] = newParent
 
   return result
 }
@@ -122,15 +134,10 @@ export function addChildAtPath(
   type: JsonValueType = 'string',
 ): unknown {
   const result = clone(obj)
-  const keys = parsePath(path)
-
-  let current = result as Record<string, unknown>
-  for (const key of keys) {
-    if (current[key] === undefined) {
-      console.error('Path not found:', path)
-      return obj
-    }
-    current = current[key] as Record<string, unknown>
+  const current = getContainerAtPath(result, path) as Record<string, unknown> | null
+  if (current === null) {
+    console.error('Path not found:', path)
+    return obj
   }
 
   if (Object.prototype.hasOwnProperty.call(current, keyName)) {
@@ -149,15 +156,10 @@ export function addArrayItem(
   type: JsonValueType = 'string',
 ): unknown {
   const result = clone(obj)
-  const keys = parsePath(path)
-
-  let current: unknown = result as Record<string, unknown> | unknown[]
-  for (const key of keys) {
-    if ((current as Record<string, unknown>)[key] === undefined) {
-      console.error('Path not found:', path)
-      return obj
-    }
-    current = (current as Record<string, unknown>)[key]
+  const current = getContainerAtPath(result, path)
+  if (current === null) {
+    console.error('Path not found:', path)
+    return obj
   }
 
   if (!Array.isArray(current)) {
@@ -172,21 +174,17 @@ export function addArrayItem(
 
 export function deleteNodeAtPath(obj: unknown, path: string): unknown {
   const result = clone(obj)
-  const keys = parsePath(path)
+  const keys = parseJsonPath(path)
 
   if (keys.length === 0) {
     console.error('Cannot delete root')
     return obj
   }
 
-  let parent = result as Record<string, unknown>
-  for (let i = 0; i < keys.length - 1; i++) {
-    const key = keys[i]
-    if (parent[key] === undefined) {
-      console.error('Parent not found:', keys.slice(0, i + 1).join('.'))
-      return obj
-    }
-    parent = parent[key] as Record<string, unknown>
+  const parent = getParentAtPath(result, keys)
+  if (!parent) {
+    console.error('Parent not found:', keys.slice(0, -1).join('.'))
+    return obj
   }
 
   const lastKey = keys[keys.length - 1]
@@ -204,17 +202,7 @@ export function deleteNodeAtPath(obj: unknown, path: string): unknown {
 }
 
 export function getValueAtPath(obj: unknown, path: string): unknown {
-  if (!path || path === 'root') return obj
-  
-  const keys = parsePath(path)
-  
-  let current = obj as Record<string, unknown>
-  for (const key of keys) {
-    if (current === undefined || current === null) return undefined
-    current = current[key] as Record<string, unknown>
-  }
-  
-  return current
+  return getValueAtJsonPath(obj, path)
 }
 
 export function insertNodeAtPath(
@@ -235,29 +223,15 @@ export function insertNodeAtPath(
   const parent = getValueAtPath(obj, parentPath)
   
   if (Array.isArray(parent)) {
-    // For arrays, push to end (ignore key, use as array item)
     const result = clone(obj)
-    const keys = parsePath(parentPath)
-    let current = result as Record<string, unknown>
-    for (let i = 0; i < keys.length - 1; i++) {
-      current = current[keys[i]] as Record<string, unknown>
-    }
-    const lastKey = keys[keys.length - 1]
-    const arr = current[lastKey] as unknown[]
+    const arr = getContainerAtPath(result, parentPath) as unknown[]
     arr.push(value)
     return result
   }
   
   if (parent && typeof parent === 'object' && !Array.isArray(parent)) {
-    // For objects, add as keyed child
     const result = clone(obj)
-    const keys = parsePath(parentPath)
-    let current = result as Record<string, unknown>
-    for (let i = 0; i < keys.length - 1; i++) {
-      current = current[keys[i]] as Record<string, unknown>
-    }
-    const lastKey = keys[keys.length - 1]
-    const targetObj = current[lastKey] as Record<string, unknown>
+    const targetObj = getContainerAtPath(result, parentPath) as Record<string, unknown>
     targetObj[key] = value
     return result
   }

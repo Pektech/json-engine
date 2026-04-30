@@ -1,4 +1,5 @@
 import type { JsonNodeType, CanvasNode, CanvasEdge, GraphData } from '@/types/canvas'
+import { getJsonPathLabel } from '@/lib/json-path'
 
 export function getJsonType(value: any): JsonNodeType {
   if (value === null) return 'null'
@@ -11,13 +12,7 @@ export function getJsonType(value: any): JsonNodeType {
 }
 
 export function getLabel(path: string): string {
-  const parts = path.split(/\.|\[(\d+)\]/).filter(Boolean)
-  const lastPart = parts[parts.length - 1] || 'root'
-  
-  if (/^\d+$/.test(lastPart)) {
-    return `[${lastPart}]`
-  }
-  return lastPart
+  return getJsonPathLabel(path)
 }
 
 export function jsonToGraph(json: any, path = 'root', depth = 0): GraphData {
