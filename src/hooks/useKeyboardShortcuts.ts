@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useFocusContext } from './useFocusContext';
 import { useFileManager } from './useFileManager';
 import { useAppStore } from '../store/app-store';
+import { APP_HOTKEYS } from '../lib/keyboard-shortcuts';
 
 let helpPanelOpenCallback: ((isOpen: boolean) => void) | null = null;
 
@@ -19,7 +20,7 @@ export function useKeyboardShortcuts() {
   // Browser help opens on bubble phase, so we need capture: true to prevent it
   useEffect(() => {
     const handleF1 = (e: KeyboardEvent) => {
-      if (e.key === 'F1') {
+      if (e.key.toLowerCase() === APP_HOTKEYS.browserHelp) {
         e.preventDefault();
         e.stopPropagation();
         if (helpPanelOpenCallback) {
@@ -65,31 +66,31 @@ export function useKeyboardShortcuts() {
     }
   };
 
-  useHotkeys('f1', (event) => {
+  useHotkeys(APP_HOTKEYS.browserHelp, (event) => {
     event.preventDefault();
     if (helpPanelOpenCallback) {
       helpPanelOpenCallback(true);
     }
   }, { preventDefault: true, enableOnFormTags: true });
 
-  useHotkeys('ctrl+/', (event) => {
+  useHotkeys(APP_HOTKEYS.openHelp, (event) => {
     event.preventDefault();
     if (helpPanelOpenCallback) {
       helpPanelOpenCallback(true);
     }
   }, { preventDefault: true, enableOnFormTags: true });
 
-  useHotkeys('ctrl+o', (event) => {
+  useHotkeys(APP_HOTKEYS.openFile, (event) => {
     event.preventDefault();
     handleOpenFile();
   }, { preventDefault: true, enableOnFormTags: true });
 
-  useHotkeys('ctrl+s', (event) => {
+  useHotkeys(APP_HOTKEYS.saveFile, (event) => {
     event.preventDefault();
     handleSaveFile();
   }, { preventDefault: true, enableOnFormTags: true });
 
-  useHotkeys('ctrl+shift+f', (event) => {
+  useHotkeys(APP_HOTKEYS.canvasSearch, (event) => {
     event.preventDefault();
     
     // Focus and select the search input
@@ -99,7 +100,7 @@ export function useKeyboardShortcuts() {
   }, { preventDefault: true, enableOnFormTags: true, enableOnContentEditable: true });
 
   // Ctrl+Z - Undo graph operation (only if canvas focused)
-  useHotkeys('ctrl+z', (e) => {
+  useHotkeys(APP_HOTKEYS.undo, (e) => {
     if (focusedArea !== 'editor') {
       e.preventDefault();
       useAppStore.getState().undo();
@@ -108,14 +109,14 @@ export function useKeyboardShortcuts() {
   }, { enableOnFormTags: true, enableOnContentEditable: true });
 
   // Ctrl+Shift+Z or Ctrl+Y - Redo graph operation
-  useHotkeys('ctrl+shift+z, ctrl+y', (e) => {
+  useHotkeys(APP_HOTKEYS.redo, (e) => {
     if (focusedArea !== 'editor') {
       e.preventDefault();
       useAppStore.getState().redo();
     }
   }, { enableOnFormTags: true, enableOnContentEditable: true });
 
-  useHotkeys('ctrl+f', (event) => {
+  useHotkeys(APP_HOTKEYS.editorFind, (event) => {
     // Only trigger canvas search if NOT in editor
     if (focusedArea !== 'editor') {
       event.preventDefault();
@@ -124,7 +125,7 @@ export function useKeyboardShortcuts() {
     // If in editor, let Monaco handle Ctrl+F natively
   }, { enableOnFormTags: true, enableOnContentEditable: true });
 
-  useHotkeys('ctrl+h', (event) => {
+  useHotkeys(APP_HOTKEYS.editorReplace, (event) => {
     // Only trigger if NOT in editor
     if (focusedArea !== 'editor') {
       event.preventDefault();

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { KEYBOARD_SHORTCUT_GROUPS } from '@/lib/keyboard-shortcuts';
 
 interface KeyboardShortcutsHelpProps {
   isOpen?: boolean;
@@ -51,75 +52,24 @@ export function KeyboardShortcutsHelp({ isOpen = false, onClose }: KeyboardShort
         </div>
         
         <div className="p-6 space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold text-on-surface mb-3">Global Shortcuts</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="flex justify-between items-center py-2 px-3 rounded-lg bg-surface-container bg-opacity-60">
-                <span className="text-on-surface">Open File</span>
-                <kbd className="px-2 py-1 bg-surface-variant text-on-surface-variant rounded text-sm font-mono">Ctrl + O</kbd>
-              </div>
-              <div className="flex justify-between items-center py-2 px-3 rounded-lg bg-surface-container bg-opacity-60">
-                <span className="text-on-surface">Save File</span>
-                <kbd className="px-2 py-1 bg-surface-variant text-on-surface-variant rounded text-sm font-mono">Ctrl + S</kbd>
-              </div>
-              <div className="flex justify-between items-center py-2 px-3 rounded-lg bg-surface-container bg-opacity-60">
-                <span className="text-on-surface">Canvas Search</span>
-                <kbd className="px-2 py-1 bg-surface-variant text-on-surface-variant rounded text-sm font-mono">Ctrl + Shift + F</kbd>
-              </div>
-              <div className="flex justify-between items-center py-2 px-3 rounded-lg bg-surface-container bg-opacity-60">
-                <span className="text-on-surface">Open Help</span>
-                <kbd className="px-2 py-1 bg-surface-variant text-on-surface-variant rounded text-sm font-mono">F1</kbd>
-              </div>
-              <div className="flex justify-between items-center py-2 px-3 rounded-lg bg-surface-container bg-opacity-60">
-                <span className="text-on-surface">Open Help</span>
-                <kbd className="px-2 py-1 bg-surface-variant text-on-surface-variant rounded text-sm font-mono">Ctrl + /</kbd>
+          {KEYBOARD_SHORTCUT_GROUPS.map((group) => (
+            <div key={group.title}>
+              <h3 className="text-lg font-semibold text-on-surface mb-3">{group.title}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {group.shortcuts.map((shortcut) => (
+                  <div
+                    key={`${shortcut.label}-${shortcut.keys}`}
+                    className="flex justify-between items-center py-2 px-3 rounded-lg bg-surface-container bg-opacity-60"
+                  >
+                    <span className="text-on-surface">{shortcut.label}</span>
+                    <kbd className="px-2 py-1 bg-surface-variant text-on-surface-variant rounded text-sm font-mono">
+                      {shortcut.keys}
+                    </kbd>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold text-on-surface mb-3">Editor Shortcuts (Monaco)</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="flex justify-between items-center py-2 px-3 rounded-lg bg-surface-container bg-opacity-60">
-                <span className="text-on-surface">Find</span>
-                <kbd className="px-2 py-1 bg-surface-variant text-on-surface-variant rounded text-sm font-mono">Ctrl + F</kbd>
-              </div>
-              <div className="flex justify-between items-center py-2 px-3 rounded-lg bg-surface-container bg-opacity-60">
-                <span className="text-on-surface">Replace</span>
-                <kbd className="px-2 py-1 bg-surface-variant text-on-surface-variant rounded text-sm font-mono">Ctrl + H</kbd>
-              </div>
-              <div className="flex justify-between items-center py-2 px-3 rounded-lg bg-surface-container bg-opacity-60">
-                <span className="text-on-surface">Find Next</span>
-                <kbd className="px-2 py-1 bg-surface-variant text-on-surface-variant rounded text-sm font-mono">F3</kbd>
-              </div>
-              <div className="flex justify-between items-center py-2 px-3 rounded-lg bg-surface-container bg-opacity-60">
-                <span className="text-on-surface">Format</span>
-                <kbd className="px-2 py-1 bg-surface-variant text-on-surface-variant rounded text-sm font-mono">Shift + Alt + F</kbd>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold text-on-surface mb-3">Canvas Shortcuts</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="flex justify-between items-center py-2 px-3 rounded-lg bg-surface-container bg-opacity-60">
-                <span className="text-on-surface">Zoom In</span>
-                <kbd className="px-2 py-1 bg-surface-variant text-on-surface-variant rounded text-sm font-mono">Ctrl + +</kbd>
-              </div>
-              <div className="flex justify-between items-center py-2 px-3 rounded-lg bg-surface-container bg-opacity-60">
-                <span className="text-on-surface">Zoom Out</span>
-                <kbd className="px-2 py-1 bg-surface-variant text-on-surface-variant rounded text-sm font-mono">Ctrl + -</kbd>
-              </div>
-              <div className="flex justify-between items-center py-2 px-3 rounded-lg bg-surface-container bg-opacity-60">
-                <span className="text-on-surface">Reset Zoom</span>
-                <kbd className="px-2 py-1 bg-surface-variant text-on-surface-variant rounded text-sm font-mono">Ctrl + 0</kbd>
-              </div>
-              <div className="flex justify-between items-center py-2 px-3 rounded-lg bg-surface-container bg-opacity-60">
-                <span className="text-on-surface">Delete Node</span>
-                <kbd className="px-2 py-1 bg-surface-variant text-on-surface-variant rounded text-sm font-mono">Delete</kbd>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>
