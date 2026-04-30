@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import { jsonToGraph, layoutGraph } from '@/lib/json-to-graph'
+import { jsonToGraph } from '@/lib/json-to-graph'
+import { layoutGraph } from '@/lib/graph-layout'
 import { validationService } from '@/lib/validation'
 import type { CanvasNode, CanvasEdge } from '@/types/canvas'
 import type { ValidationError } from '@/types/validation'
@@ -48,6 +49,68 @@ interface AppActions {
   undo: () => void
   redo: () => void
   setFileHandle: (handle: FileSystemFileHandle | null) => void
+}
+
+type GraphState = Pick<AppState, 'parsedJson' | 'nodes' | 'edges' | 'parseError'>
+
+function buildGraphState(parsedJson: any, expandedNodes: Set<string>): GraphState {
+  const graph = jsonToGraph(parsedJson)
+  const layoutedNodes = layoutGraph(graph.nodes, graph.edges)
+  const visibleNodes = layoutedNodes.filter(node => {
+    const parentPath = node.id.split(/\.|\[/)[0]
+    return expandedNodes.has(parentPath) || node.id === 'root'
+  })
+  const visibleNodeIds = new Set(visibleNodes.map(n => n.id))
+  const visibleEdges = graph.edges.filter(edge => 
+    visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target)
+  )
+
+  return {
+    parsedJson,
+    nodes: layoutedNodes,
+    edges: visibleEdges,
+    parseError: null,
+  }
+}
+
+function buildHistoryState(jsonText: string, historyIndex: number, expandedNodes: Set<string>): Partial<AppState> {
+  let parsedJson: any = null
+
+  try {
+    parsedJson = JSON.parse(jsonText)
+  } catch (e) {
+    parsedJson = null
+  }
+
+  if (parsedJson !== null) {
+    return {
+      historyIndex,
+      jsonText,
+      ...buildGraphState(parsedJson, expandedNodes),
+      selectedPath: 'root',
+      isDirty: true,
+      nodePositions: {},
+      validationErrors: []
+    }
+  }
+
+  return {
+    historyIndex,
+    jsonText,
+    parsedJson: null,
+    nodes: [],
+    edges: [],
+    selectedPath: null,
+    isDirty: true,
+    parseError: 'Invalid JSON in history',
+    validationErrors: [{
+      path: 'root',
+      line: 1,
+      column: 1,
+      message: 'Invalid JSON in history',
+      severity: 'error'
+    }]
+  }
 }
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
@@ -109,25 +172,9 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
     debounceTimer = setTimeout(() => {
       try {
         const parsed = JSON.parse(text)
-        const graph = jsonToGraph(parsed)
-        const layoutedNodes = layoutGraph(graph.nodes, graph.edges)
-        
-        const { expandedNodes } = get()
-        const visibleNodes = layoutedNodes.filter(node => {
-          const parentPath = node.id.split(/\.|\[/)[0]
-          return expandedNodes.has(parentPath) || node.id === 'root'
-        })
-
-        const visibleNodeIds = new Set(visibleNodes.map(n => n.id))
-        const visibleEdges = graph.edges.filter(edge => 
-          visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target)
-        )
 
         set({ 
-          parsedJson: parsed, 
-          nodes: layoutedNodes, 
-          edges: visibleEdges, 
-          parseError: null,
+          ...buildGraphState(parsed, get().expandedNodes),
         })
         
         get().validateJson()
@@ -301,60 +348,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
 
       if (state.historyIndex > 0) {
         const prevJson = state.history[state.historyIndex - 1]
-        let parsed: any = null
-
-        try {
-          parsed = JSON.parse(prevJson)
-        } catch (e) {
-          parsed = null
-        }
-
-        if (parsed !== null) {
-          const graph = jsonToGraph(parsed)
-          const layoutedNodes = layoutGraph(graph.nodes, graph.edges)
-
-          const { expandedNodes } = state
-          const visibleNodes = layoutedNodes.filter(node => {
-            const parentPath = node.id.split(/\.|\[/)[0]
-            return expandedNodes.has(parentPath) || node.id === 'root'
-          })
-
-          const visibleNodeIds = new Set(visibleNodes.map(n => n.id))
-          const visibleEdges = graph.edges.filter(edge =>
-            visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target)
-          )
-
-          return {
-            historyIndex: state.historyIndex - 1,
-            jsonText: prevJson,
-            parsedJson: parsed,
-            nodes: layoutedNodes,
-            edges: visibleEdges,
-            selectedPath: 'root',
-            isDirty: true,
-            parseError: null,
-            nodePositions: {},
-            validationErrors: []
-          }
-        } else {
-          return {
-            historyIndex: state.historyIndex - 1,
-            jsonText: prevJson,
-            parsedJson: null,
-            nodes: [],
-            edges: [],
-            selectedPath: null,
-            isDirty: true,
-            parseError: 'Invalid JSON in history',
-            validationErrors: [{
-              path: 'root',
-              line: 1,
-              column: 1,
-              message: 'Invalid JSON in history',
-              severity: 'error'
-            }]
-          }
-        }
+        return buildHistoryState(prevJson, state.historyIndex - 1, state.expandedNodes)
       }
       return {}
     })
@@ -369,60 +363,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
 
       if (state.historyIndex < state.history.length - 1) {
         const nextJson = state.history[state.historyIndex + 1]
-        let parsed: any = null
-
-        try {
-          parsed = JSON.parse(nextJson)
-        } catch (e) {
-          parsed = null
-        }
-
-        if (parsed !== null) {
-          const graph = jsonToGraph(parsed)
-          const layoutedNodes = layoutGraph(graph.nodes, graph.edges)
-
-          const { expandedNodes } = state
-          const visibleNodes = layoutedNodes.filter(node => {
-            const parentPath = node.id.split(/\.|\[/)[0]
-            return expandedNodes.has(parentPath) || node.id === 'root'
-          })
-
-          const visibleNodeIds = new Set(visibleNodes.map(n => n.id))
-          const visibleEdges = graph.edges.filter(edge =>
-            visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target)
-          )
-
-          return {
-            historyIndex: state.historyIndex + 1,
-            jsonText: nextJson,
-            parsedJson: parsed,
-            nodes: layoutedNodes,
-            edges: visibleEdges,
-            selectedPath: 'root',
-            isDirty: true,
-            parseError: null,
-            nodePositions: {},
-            validationErrors: []
-          }
-        } else {
-          return {
-            historyIndex: state.historyIndex + 1,
-            jsonText: nextJson,
-            parsedJson: null,
-            nodes: [],
-            edges: [],
-            selectedPath: null,
-            isDirty: true,
-            parseError: 'Invalid JSON in history',
-            validationErrors: [{
-              path: 'root',
-              line: 1,
-              column: 1,
-              message: 'Invalid JSON in history',
-              severity: 'error'
-            }]
-          }
-        }
+        return buildHistoryState(nextJson, state.historyIndex + 1, state.expandedNodes)
       }
       return {}
     })

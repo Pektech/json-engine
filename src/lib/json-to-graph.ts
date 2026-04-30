@@ -1,4 +1,3 @@
-import dagre from '@dagrejs/dagre'
 import type { JsonNodeType, CanvasNode, CanvasEdge, GraphData } from '@/types/canvas'
 
 export function getJsonType(value: any): JsonNodeType {
@@ -72,37 +71,6 @@ export function jsonToGraph(json: any, path = 'root', depth = 0): GraphData {
   }
   
   return { nodes, edges }
-}
-
-export function layoutGraph(nodes: CanvasNode[], edges: CanvasEdge[]): CanvasNode[] {
-  const graph = new dagre.graphlib.Graph()
-  graph.setGraph({ 
-    rankdir: 'LR',
-    nodesep: 80,
-    ranksep: 100,
-    edgesep: 40,
-  })
-  graph.setDefaultEdgeLabel(() => ({}))
-
-  nodes.forEach(node => {
-    graph.setNode(node.id, { width: 220, height: 70 })
-  })
-
-  edges.forEach(edge => {
-    graph.setEdge(edge.source, edge.target)
-  })
-
-  dagre.layout(graph)
-
-  const layoutedNodes = nodes.map(node => {
-    const positioned = graph.node(node.id)
-    return {
-      ...node,
-      position: { x: positioned.x - 110, y: positioned.y - 35 },
-    }
-  })
-
-  return layoutedNodes
 }
 
 export function countNodes(json: any): number {

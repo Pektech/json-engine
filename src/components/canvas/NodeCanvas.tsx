@@ -14,7 +14,7 @@ import '@xyflow/react/dist/style.css'
 import { JsonNode } from './JsonNode'
 import { JsonEdge } from './JsonEdge'
 import { jsonToGraph } from '@/lib/json-to-graph'
-import { layoutGraph } from '@/lib/json-to-graph'
+import { layoutGraph } from '@/lib/graph-layout'
 import { useFocusContext } from '@/hooks/useFocusContext'
 
 interface NodeCanvasProps {
